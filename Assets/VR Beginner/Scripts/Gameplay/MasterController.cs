@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using CommonUsages = UnityEngine.XR.CommonUsages;
@@ -58,6 +59,13 @@ public class MasterController : MonoBehaviour
     
     List<XRBaseInteractable> m_InteractableCache = new List<XRBaseInteractable>(16);
 
+
+    /// edited ///
+    Gradient invalidRay;
+    Gradient validRay;
+    public LocomotionSystem locomotionSystem;
+    //////////////
+
     void Awake()
     {
         s_Instance = this;
@@ -88,6 +96,11 @@ public class MasterController : MonoBehaviour
 
         m_OriginalRightMask = RightTeleportInteractor.interactionLayerMask;
         m_OriginalLeftMask = LeftTeleportInteractor.interactionLayerMask;
+
+        /// edited ///
+        invalidRay = m_RightLineVisual.invalidColorGradient;
+        validRay = m_RightLineVisual.validColorGradient;
+        //////////////
         
         if (!DisableSetupForDebug)
         {
@@ -116,6 +129,8 @@ public class MasterController : MonoBehaviour
 
         if (m_Rig.currentTrackingOriginMode != TrackingOriginModeFlags.Floor)
             m_Rig.cameraYOffset = 1.8f;
+
+
     }
 
     void RegisterDevices(InputDevice connectedDevice)
@@ -153,14 +168,41 @@ public class MasterController : MonoBehaviour
         m_RightLineVisual.enabled = axisInput.y > 0.5f;
         
         RightTeleportInteractor.interactionLayerMask = m_LastFrameRightEnable ? m_OriginalRightMask : new LayerMask();
+
+
+        bool canTeleport = false;
+        /// edited ///
+        if (m_RightLineVisual.enabled)
+        {
+            RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
+            int hitLayer = hit.collider.gameObject.layer;
+            string hitLayerName = LayerMask.LayerToName(hitLayer);
+            if (hitLayerName == "Teleporter")
+            {
+                m_RightLineVisual.invalidColorGradient = validRay;
+                canTeleport = true;
+            }
+            else
+            {
+                m_RightLineVisual.invalidColorGradient = invalidRay;
+            }
+
+        }
+        
+        //////////////
         
         if (axisInput.y <= 0.5f && m_PreviousRightClicked)
         {
-            m_RightController.Select();
-            
+            /// edited ///
+            //m_RightController.Select();
+            RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
+            TeleportRequest teleportRequest = new TeleportRequest();
+            teleportRequest.destinationPosition = hit.point;
+            teleportRequest.destinationRotation = transform.rotation;
+            locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
+            //////////////
         }
 
-        
         if (axisInput.y <= -0.5f)
         {
             if(!RightTractorBeam.IsTracting)
@@ -178,7 +220,8 @@ public class MasterController : MonoBehaviour
             m_RightHandPrefab = RightDirectInteractor.GetComponentInChildren<HandPrefab>();
         }
 
-        m_PreviousRightClicked = axisInput.y > 0.5f;
+        //m_PreviousRightClicked = axisInput.y > 0.5f;
+        m_PreviousRightClicked = canTeleport; // edited
 
         if (m_RightHandPrefab != null)
         {

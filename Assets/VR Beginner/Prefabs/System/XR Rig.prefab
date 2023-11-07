@@ -1967,6 +1967,7 @@ MonoBehaviour:
   LeftDirectInteractor: {fileID: 1837324665045843313}
   RightTractorBeam: {fileID: 1358349930}
   LeftTractorBeam: {fileID: 6341845782098252963}
+  locomotionSystem: {fileID: 0}
 --- !u!1 &1837324665045843319
 GameObject:
   m_ObjectHideFlags: 0

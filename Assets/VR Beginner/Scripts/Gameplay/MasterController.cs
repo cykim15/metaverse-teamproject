@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -23,7 +24,11 @@ public class MasterController : MonoBehaviour
     public bool DisableSetupForDebug = false;
     public Transform StartingPosition;
     public GameObject TeleporterParent;
-    
+    [SerializeField]
+    float wallClippingBoxSize;
+    [SerializeField]
+    float obstaclePreventTeleportationDistance;
+
     [Header("Reference")]
     public XRRayInteractor RightTeleportInteractor;
     public XRRayInteractor LeftTeleportInteractor;
@@ -64,12 +69,18 @@ public class MasterController : MonoBehaviour
     Gradient invalidRay;
     Gradient validRay;
     public LocomotionSystem locomotionSystem;
+    TpGage playerTeleportationGage;
+    
+    [SerializeField]
+    LayerMask obstacleLayerMask;
+    private Vector3 boxSize;
     //////////////
 
     void Awake()
     {
         s_Instance = this;
         m_Rig = GetComponent<XRRig>();
+        boxSize = new Vector3(wallClippingBoxSize, wallClippingBoxSize, wallClippingBoxSize);
        
     }
 
@@ -100,6 +111,7 @@ public class MasterController : MonoBehaviour
         /// edited ///
         invalidRay = m_RightLineVisual.invalidColorGradient;
         validRay = m_RightLineVisual.validColorGradient;
+        playerTeleportationGage = GetComponent<TpGage>();
         //////////////
         
         if (!DisableSetupForDebug)
@@ -162,6 +174,16 @@ public class MasterController : MonoBehaviour
 
     void RightTeleportUpdate()
     {
+        /*
+        Bounds bounds = new Bounds(RightDirectInteractor.transform.position, boxSize);
+        Collider[] colliders = Physics.OverlapBox(RightDirectInteractor.transform.position, boxSize / 2f, Quaternion.identity, obstacleLayerMask);
+        if (colliders.Length > 0)
+        {
+            Debug.Log("hi");
+            return;
+        }
+        Debug.Log("sex");*/
+
         Vector2 axisInput;
         m_RightInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
         
@@ -175,17 +197,22 @@ public class MasterController : MonoBehaviour
         if (m_RightLineVisual.enabled)
         {
             RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-            int hitLayer = hit.collider.gameObject.layer;
-            string hitLayerName = LayerMask.LayerToName(hitLayer);
-            if (hitLayerName == "Teleporter")
+            
+            if (hit.collider != null)
             {
-                m_RightLineVisual.invalidColorGradient = validRay;
-                canTeleport = true;
+                int hitLayer = hit.collider.gameObject.layer;
+                string hitLayerName = LayerMask.LayerToName(hitLayer);
+                if (hitLayerName == "Teleporter" && CanTeleportConsideringEnemies(hit.point) && CanTeleportConsideringObstacles(hit.point))
+                {
+                    m_RightLineVisual.invalidColorGradient = validRay;
+                    canTeleport = true;
+                }
+                else
+                {
+                    m_RightLineVisual.invalidColorGradient = invalidRay;
+                }
             }
-            else
-            {
-                m_RightLineVisual.invalidColorGradient = invalidRay;
-            }
+     
 
         }
         
@@ -196,13 +223,20 @@ public class MasterController : MonoBehaviour
             /// edited ///
             //m_RightController.Select();
             RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-            TeleportRequest teleportRequest = new TeleportRequest();
-            teleportRequest.destinationPosition = hit.point;
-            teleportRequest.destinationRotation = transform.rotation;
-            locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
+
+            float distance = Vector3.Distance(transform.position, hit.point);
+            if (playerTeleportationGage.CanTeleport(distance))
+            {
+                TeleportRequest teleportRequest = new TeleportRequest();
+                teleportRequest.destinationPosition = hit.point;
+                teleportRequest.destinationRotation = transform.rotation;
+                locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
+                playerTeleportationGage.ConsumeGage(distance);
+            }
             //////////////
         }
 
+        /*
         if (axisInput.y <= -0.5f)
         {
             if(!RightTractorBeam.IsTracting)
@@ -211,7 +245,7 @@ public class MasterController : MonoBehaviour
         else if(RightTractorBeam.IsTracting)
         {
             RightTractorBeam.StopTracting();
-        }
+        }*/
 
         //if the right animator is null, we try to get it. It's not the best performance wise but no other way as setup
         //of the model by the Interaction Toolkit is done on the first update.
@@ -220,12 +254,14 @@ public class MasterController : MonoBehaviour
             m_RightHandPrefab = RightDirectInteractor.GetComponentInChildren<HandPrefab>();
         }
 
+        /// edited ///
         //m_PreviousRightClicked = axisInput.y > 0.5f;
-        m_PreviousRightClicked = canTeleport; // edited
+        m_PreviousRightClicked = canTeleport;
+        //////////////
 
         if (m_RightHandPrefab != null)
         {
-            m_RightHandPrefab.Animator.SetBool("Pointing", m_PreviousRightClicked);
+            m_RightHandPrefab.Animator.SetBool("Pointing", axisInput.y > 0.5f);
         }
 
         m_LastFrameRightEnable = m_RightLineVisual.enabled;
@@ -233,18 +269,64 @@ public class MasterController : MonoBehaviour
 
     void LeftTeleportUpdate()
     {
+        /*
+        Bounds bounds = new Bounds(LeftDirectInteractor.transform.position, boxSize);
+        Collider[] colliders = Physics.OverlapBox(LeftDirectInteractor.transform.position, boxSize / 2f, Quaternion.identity, obstacleLayerMask);
+        if (colliders.Length > 0) return;*/
+
         Vector2 axisInput;
         m_LeftInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
-        
+
         m_LeftLineVisual.enabled = axisInput.y > 0.5f;
-        
-        LeftTeleportInteractor.interactionLayerMask = m_LastFrameLeftEnable ? m_OriginalLeftMask : new LayerMask();
-        
+
+        LeftTeleportInteractor.interactionLayerMask = m_LastFrameRightEnable ? m_OriginalRightMask : new LayerMask();
+
+
+        bool canTeleport = false;
+        /// edited ///
+        if (m_LeftLineVisual.enabled)
+        {
+            LeftTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
+
+            if (hit.collider != null)
+            {
+                int hitLayer = hit.collider.gameObject.layer;
+                string hitLayerName = LayerMask.LayerToName(hitLayer);
+                if (hitLayerName == "Teleporter" && CanTeleportConsideringEnemies(hit.point) && CanTeleportConsideringObstacles(hit.point))
+                {
+                    m_LeftLineVisual.invalidColorGradient = validRay;
+                    canTeleport = true;
+                }
+                else
+                {
+                    m_LeftLineVisual.invalidColorGradient = invalidRay;
+                }
+            }
+
+
+        }
+
+        //////////////
+
         if (axisInput.y <= 0.5f && m_PreviousLeftClicked)
         {
-            m_LeftController.Select();
+            /// edited ///
+            //m_LeftController.Select();
+            LeftTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
+
+            float distance = Vector3.Distance(transform.position, hit.point);
+            if (playerTeleportationGage.CanTeleport(distance))
+            {
+                TeleportRequest teleportRequest = new TeleportRequest();
+                teleportRequest.destinationPosition = hit.point;
+                teleportRequest.destinationRotation = transform.rotation;
+                locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
+                playerTeleportationGage.ConsumeGage(distance);
+            }
+            //////////////
         }
-        
+
+        /*
         if (axisInput.y <= -0.5f)
         {
             if(!LeftTractorBeam.IsTracting)
@@ -253,8 +335,8 @@ public class MasterController : MonoBehaviour
         else if(LeftTractorBeam.IsTracting)
         {
             LeftTractorBeam.StopTracting();
-        }
-        
+        }*/
+
         //if the left animator is null, we try to get it. It's not the best performance wise but no other way as setup
         //of the model by the Interaction Toolkit is done on the first update.
         if (m_LeftHandPrefab == null)
@@ -262,11 +344,66 @@ public class MasterController : MonoBehaviour
             m_LeftHandPrefab = LeftDirectInteractor.GetComponentInChildren<HandPrefab>();
         }
 
-        m_PreviousLeftClicked = axisInput.y > 0.5f;
-        
+        /// edited ///
+        //m_PreviousLeftClicked = axisInput.y > 0.5f;
+        m_PreviousLeftClicked = canTeleport;
+        //////////////
+
         if (m_LeftHandPrefab != null)
-            m_LeftHandPrefab.Animator.SetBool("Pointing", m_PreviousLeftClicked);
-        
+        {
+            m_LeftHandPrefab.Animator.SetBool("Pointing", axisInput.y > 0.5f);
+        }
+
         m_LastFrameLeftEnable = m_LeftLineVisual.enabled;
+    }
+
+    private bool CanTeleportConsideringEnemies(Vector3 targetPosition)
+    {
+        float closestDistance = float.MaxValue;
+        GameObject closestEnemy = null;
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
+        {
+            float distanceToEnemy = Vector3.Distance(targetPosition, enemy.transform.position);
+
+            if (distanceToEnemy < closestDistance)
+            {
+                closestDistance = distanceToEnemy;
+                closestEnemy = enemy;
+            }
+        }
+
+        if (closestEnemy == null) return true;
+
+        if (closestDistance < closestEnemy.GetComponent<Enemy>().FightDistance) return false;
+        else return true;
+    }
+
+    private bool CanTeleportConsideringObstacles(Vector3 targetPosition)
+    {
+        float closestDistance = float.MaxValue;
+        GameObject closestObstacle = null;
+
+        GameObject[] obstacles = GameObject.FindGameObjectsWithTag("Obstacles");
+
+        foreach (GameObject obstacle in obstacles)
+        {
+            Vector3 closestPointOnCollider = obstacle.GetComponent<Collider>().ClosestPointOnBounds(targetPosition);
+
+            float distanceToCollider = Vector3.Distance(targetPosition, closestPointOnCollider);
+
+            if (distanceToCollider < closestDistance)
+            {
+                closestDistance = distanceToCollider;
+                closestObstacle = obstacle;
+            }
+        }
+
+        if (closestObstacle == null) return true;
+
+        if (closestDistance < obstaclePreventTeleportationDistance) return false;
+        else return true;
     }
 }

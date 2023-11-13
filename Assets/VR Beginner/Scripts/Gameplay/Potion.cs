@@ -167,12 +167,13 @@ public class Potion : MonoBehaviour
             {
                 child.gameObject.SetActive(false);
             }
-
+            
             if (particleSystemSplash != null)
             {       
                 particleSystemSplash.gameObject.SetActive(true);
-                if (fillAmount > 0)
+                if (fillAmount > 0f)
                 {
+                    Debug.Log("hi");
                     particleSystemSplash.Play();
                 }
             }

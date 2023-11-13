@@ -5,15 +5,17 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ignite
+  - Enemy
+  - Obstacles
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
+  - Weapon
+  - Enemy
   - Grabbable
   - Hands
   - Teleporter

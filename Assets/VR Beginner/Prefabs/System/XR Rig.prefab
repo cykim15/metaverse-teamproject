@@ -1961,6 +1961,8 @@ MonoBehaviour:
   DisableSetupForDebug: 0
   StartingPosition: {fileID: 0}
   TeleporterParent: {fileID: 0}
+  wallClippingBoxSize: 0
+  obstaclePreventTeleportationDistance: 0
   RightTeleportInteractor: {fileID: 3487965464052155653}
   LeftTeleportInteractor: {fileID: 2712973386093634028}
   RightDirectInteractor: {fileID: 1837324663945620828}
@@ -1968,6 +1970,9 @@ MonoBehaviour:
   RightTractorBeam: {fileID: 1358349930}
   LeftTractorBeam: {fileID: 6341845782098252963}
   locomotionSystem: {fileID: 0}
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1837324665045843319
 GameObject:
   m_ObjectHideFlags: 0

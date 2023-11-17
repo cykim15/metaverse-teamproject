@@ -47,6 +47,8 @@ public class Enemy : MonoBehaviour
 
     public float FightDistance => fightDistance;
 
+    public Animator animator;
+
 
     private void Awake()
     {
@@ -56,6 +58,7 @@ public class Enemy : MonoBehaviour
         enemyHP = GetComponent<HP>();
         textHP.enabled = false;
         textName.text = enemyName;
+        animator = GetComponent<Animator>();
     }
     private void Update()
     {
@@ -124,15 +127,18 @@ public class Enemy : MonoBehaviour
                 if (Physics.Raycast(enemyEyes.position, player.transform.position + new Vector3(0, 1.5f, 0) - enemyEyes.position, out hit) && hit.collider.gameObject == player) // eye to eye
                 {
                     //Debug.Log("찾았다!");
+                    animator.SetBool("Run", true);
                     navMeshAgent.SetDestination(player.transform.position);
                 }
                 else
                 {
                     //Debug.Log("놓쳤다!");
+                    animator.SetBool("Run", false);
                 } 
 
                 if (Vector3.Distance(transform.position, player.transform.position) < fightDistance + 0.3f)
                 {
+                    animator.SetBool("Attack", true);
                     isFighting = true;
                     textHP.enabled = true;
                     Debug.Log("전투 시작");
@@ -152,6 +158,7 @@ public class Enemy : MonoBehaviour
             // 플레이어가 전투 거리를 벗어났을 때
             if (Vector3.Distance(transform.position, player.transform.position) > fightDistance + 0.3f)
             {
+                animator.SetBool("Attack", false);
                 isFighting = false;
                 textHP.enabled = false;
                 //navMeshAgent.enabled = true;
@@ -177,6 +184,7 @@ public class Enemy : MonoBehaviour
         if (enemyHP.Current < 1f)
         {
             isAlive = true;
+            animator.SetTrigger("Die");
             Destroy(gameObject, 3f);
         }
     }

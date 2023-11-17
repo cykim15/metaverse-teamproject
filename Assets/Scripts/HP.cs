@@ -23,11 +23,19 @@ public class HP : MonoBehaviour
         }
     }
 
+    public Animator animator;
+
     private void Awake()
     {
         Current = max;
+        animator = GetComponent<Animator>();
     }
 
     public void IncreaseHP(float value) { Current += value; }
-    public void DecreaseHP(float value) { Current -= value; }
+    public void DecreaseHP(float value)
+    { 
+        Current -= value;
+        animator.SetTrigger("Hit");
+    }
+
 }

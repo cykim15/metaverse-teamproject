@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class HP : MonoBehaviour
 {
@@ -35,7 +36,5 @@ public class HP : MonoBehaviour
     public void DecreaseHP(float value)
     { 
         Current -= value;
-        animator.SetTrigger("Hit");
     }
-
 }

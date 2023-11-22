@@ -39,8 +39,6 @@ public class Enemy : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private HP enemyHP;
 
-    private bool detected = false;
-
     private bool isFighting = false;
 
     private bool isAlive = true;
@@ -63,58 +61,7 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         if (isAlive == false) return;
-        /*
-        // 따돌리기 없는 버전
-        if (!isFighting)
-        {
-            // 못 찾았을 때 플레이어에게 ray를 쏴서 찾기
-            if (!detected)
-            {
-                float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-                if (distanceToPlayer < detectionRange)
-                {
-                    RaycastHit hit;
-                    if (Physics.Raycast(transform.position, player.transform.position - transform.position, out hit, detectionRange))
-                    {
-                        if (hit.collider.gameObject == player)
-                        {
-                            detected = true;
-                            Debug.Log("찾았다! 추적 시작");
-                        }
-                    }
-                }
-            }
 
-            // 찾았을 때 추적
-            else
-            {
-                navMeshAgent.SetDestination(player.transform.position);
-
-                // 전투 거리에 진입했을 때 추적 중지
-                if (Vector3.Distance(transform.position, player.transform.position) < fightDistance)
-                {
-                    //navMeshAgent.isStopped = true;
-                    isFighting = true;
-                    textHP.enabled = true;
-                    Debug.Log("전투 시작");
-                }
-            }
-        }
-        
-        else
-        {
-            // 전투 거리를 벗어났을 때 다시 추적
-            if (Vector3.Distance(transform.position, player.transform.position) > fightDistance + 0.1f)
-            {
-                //navMeshAgent.isStopped = false;
-                isFighting = false;
-                textHP.enabled = false;
-                Debug.Log("추적 재개");
-            }
-        }
-        */
-
-        // 따돌리기 있는 버전
         if (!isFighting)
         {
             if (navMeshAgent.enabled == false) navMeshAgent.enabled = true;
@@ -141,7 +88,7 @@ public class Enemy : MonoBehaviour
                     animator.SetBool("Attack", true);
                     isFighting = true;
                     textHP.enabled = true;
-                    Debug.Log("전투 시작");
+                    Debug.Log("전투 시작"); 
                 }
             }
         }
@@ -183,9 +130,16 @@ public class Enemy : MonoBehaviour
     {
         if (enemyHP.Current < 1f)
         {
-            isAlive = true;
+            isAlive = false;
             animator.SetTrigger("Die");
             Destroy(gameObject, 3f);
         }
+    }
+
+    public void Damaged(float damage)
+    {
+        enemyHP.DecreaseHP(damage);
+        animator.SetTrigger("Hit");
+        CheckAlive();
     }
 }

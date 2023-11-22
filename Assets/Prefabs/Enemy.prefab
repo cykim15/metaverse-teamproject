@@ -398,7 +398,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyName: "\uC2E4\uD5D8\uCCB41"
-  fightDistance: 1.8
+  fightDistance: 2
   detectionRange: 8
   movePoints: []
   moveSpeed: 1
@@ -424,6 +424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   max: 100
+  animator: {fileID: 0}
 --- !u!95 &-4016628430898167132
 Animator:
   serializedVersion: 3

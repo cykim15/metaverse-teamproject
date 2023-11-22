@@ -6,20 +6,26 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem.HID;
 
-public class Sword : MonoBehaviour
+public class MeleeWeapon : MonoBehaviour
 {
     [Header("Parameter")]
     [SerializeField]
     private float maxCooldownTime;
-    [SerializeField]
+    [SerializeField, Tooltip("휘두르는 세기 = a * speed + b * angularSpeed 일 때, a의 값에 해당합니다.")]
+    private float speedWeight;
+    [SerializeField, Tooltip("휘두르는 세기 = a * speed + b * angularSpeed 일 때, b의 값에 해당합니다.")]
+    private float angularSpeedWeight;
+    [SerializeField, Tooltip("휘두르는 세기가 이 값을 넘어야 공격으로 판정됩니다.")]
     private float swingIntensityThreshold;
-    [SerializeField]
+    [SerializeField, Tooltip("실제 데미지는 휘두르는 세기에 해당 값을 곱하여 계산됩니다.")]
     private float damageWeight;
 
     private float currentCooldownTime;
     private bool isCooldown;
 
     [Header("Reference")]
+    [SerializeField]
+    private Collider blade;
     [SerializeField]
     private GameObject cooldownUI;
     [SerializeField]
@@ -122,8 +128,7 @@ public class Sword : MonoBehaviour
             if (isCooldown == false)
             {
                 float damage = damageWeight * swingIntensity;
-                targetObject.GetComponent<HP>().DecreaseHP(damage);
-                targetObject.GetComponent<Enemy>().CheckAlive();
+                targetObject.GetComponent<Enemy>().Damaged(damage);
                 //Debug.Log($"적에게 {damage.ToString("F2")}의 데미지 입힘");
                 StartCooldownTime();
             }

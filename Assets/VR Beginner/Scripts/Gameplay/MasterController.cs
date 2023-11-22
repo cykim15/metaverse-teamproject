@@ -24,10 +24,6 @@ public class MasterController : MonoBehaviour
     public bool DisableSetupForDebug = false;
     public Transform StartingPosition;
     public GameObject TeleporterParent;
-    [SerializeField]
-    float wallClippingBoxSize;
-    [SerializeField]
-    float obstaclePreventTeleportationDistance;
 
     [Header("Reference")]
     public XRRayInteractor RightTeleportInteractor;
@@ -79,9 +75,7 @@ public class MasterController : MonoBehaviour
     void Awake()
     {
         s_Instance = this;
-        m_Rig = GetComponent<XRRig>();
-        boxSize = new Vector3(wallClippingBoxSize, wallClippingBoxSize, wallClippingBoxSize);
-       
+        m_Rig = GetComponent<XRRig>();    
     }
 
     void OnEnable()
@@ -168,22 +162,14 @@ public class MasterController : MonoBehaviour
         if(Keyboard.current.escapeKey.wasPressedThisFrame)
             Application.Quit();
         
+        /*
         RightTeleportUpdate();
-        LeftTeleportUpdate();
+        LeftTeleportUpdate();*/
     }
 
+    
     void RightTeleportUpdate()
     {
-        /*
-        Bounds bounds = new Bounds(RightDirectInteractor.transform.position, boxSize);
-        Collider[] colliders = Physics.OverlapBox(RightDirectInteractor.transform.position, boxSize / 2f, Quaternion.identity, obstacleLayerMask);
-        if (colliders.Length > 0)
-        {
-            Debug.Log("hi");
-            return;
-        }
-        Debug.Log("sex");*/
-
         Vector2 axisInput;
         m_RightInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
         
@@ -202,7 +188,7 @@ public class MasterController : MonoBehaviour
             {
                 int hitLayer = hit.collider.gameObject.layer;
                 string hitLayerName = LayerMask.LayerToName(hitLayer);
-                if (hitLayerName == "Teleporter" && CanTeleportConsideringEnemies(hit.point) && CanTeleportConsideringObstacles(hit.point))
+                if (hitLayerName == "Teleporter")
                 {
                     m_RightLineVisual.invalidColorGradient = validRay;
                     canTeleport = true;
@@ -269,11 +255,6 @@ public class MasterController : MonoBehaviour
 
     void LeftTeleportUpdate()
     {
-        /*
-        Bounds bounds = new Bounds(LeftDirectInteractor.transform.position, boxSize);
-        Collider[] colliders = Physics.OverlapBox(LeftDirectInteractor.transform.position, boxSize / 2f, Quaternion.identity, obstacleLayerMask);
-        if (colliders.Length > 0) return;*/
-
         Vector2 axisInput;
         m_LeftInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
 
@@ -292,7 +273,7 @@ public class MasterController : MonoBehaviour
             {
                 int hitLayer = hit.collider.gameObject.layer;
                 string hitLayerName = LayerMask.LayerToName(hitLayer);
-                if (hitLayerName == "Teleporter" && CanTeleportConsideringEnemies(hit.point) && CanTeleportConsideringObstacles(hit.point))
+                if (hitLayerName == "Teleporter")
                 {
                     m_LeftLineVisual.invalidColorGradient = validRay;
                     canTeleport = true;
@@ -355,55 +336,5 @@ public class MasterController : MonoBehaviour
         }
 
         m_LastFrameLeftEnable = m_LeftLineVisual.enabled;
-    }
-
-    private bool CanTeleportConsideringEnemies(Vector3 targetPosition)
-    {
-        float closestDistance = float.MaxValue;
-        GameObject closestEnemy = null;
-
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        foreach (GameObject enemy in enemies)
-        {
-            float distanceToEnemy = Vector3.Distance(targetPosition, enemy.transform.position);
-
-            if (distanceToEnemy < closestDistance)
-            {
-                closestDistance = distanceToEnemy;
-                closestEnemy = enemy;
-            }
-        }
-
-        if (closestEnemy == null) return true;
-
-        if (closestDistance < closestEnemy.GetComponent<Enemy>().FightDistance) return false;
-        else return true;
-    }
-
-    private bool CanTeleportConsideringObstacles(Vector3 targetPosition)
-    {
-        float closestDistance = float.MaxValue;
-        GameObject closestObstacle = null;
-
-        GameObject[] obstacles = GameObject.FindGameObjectsWithTag("Obstacles");
-
-        foreach (GameObject obstacle in obstacles)
-        {
-            Vector3 closestPointOnCollider = obstacle.GetComponent<Collider>().ClosestPointOnBounds(targetPosition);
-
-            float distanceToCollider = Vector3.Distance(targetPosition, closestPointOnCollider);
-
-            if (distanceToCollider < closestDistance)
-            {
-                closestDistance = distanceToCollider;
-                closestObstacle = obstacle;
-            }
-        }
-
-        if (closestObstacle == null) return true;
-
-        if (closestDistance < obstaclePreventTeleportationDistance) return false;
-        else return true;
     }
 }

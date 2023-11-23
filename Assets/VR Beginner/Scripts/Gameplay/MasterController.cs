@@ -21,7 +21,6 @@ public class MasterController : MonoBehaviour
     public XRRig Rig => m_Rig;
 
     [Header("Setup")]
-    public bool DisableSetupForDebug = false;
     public Transform StartingPosition;
     public GameObject TeleporterParent;
 
@@ -49,33 +48,15 @@ public class MasterController : MonoBehaviour
     XRReleaseController m_RightController;
     XRReleaseController m_LeftController;
 
-    bool m_PreviousRightClicked = false;
-    bool m_PreviousLeftClicked = false;
-
-    bool m_LastFrameRightEnable = false;
-    bool m_LastFrameLeftEnable = false;
-
     LayerMask m_OriginalRightMask;
     LayerMask m_OriginalLeftMask;
     
     List<XRBaseInteractable> m_InteractableCache = new List<XRBaseInteractable>(16);
 
-
-    /// edited ///
-    Gradient invalidRay;
-    Gradient validRay;
-    public LocomotionSystem locomotionSystem;
-    TpGage playerTeleportationGage;
-    
-    [SerializeField]
-    LayerMask obstacleLayerMask;
-    private Vector3 boxSize;
-    //////////////
-
     void Awake()
     {
         s_Instance = this;
-        m_Rig = GetComponent<XRRig>();    
+        m_Rig = GetComponent<XRRig>();
     }
 
     void OnEnable()
@@ -101,22 +82,13 @@ public class MasterController : MonoBehaviour
 
         m_OriginalRightMask = RightTeleportInteractor.interactionLayerMask;
         m_OriginalLeftMask = LeftTeleportInteractor.interactionLayerMask;
-
-        /// edited ///
-        invalidRay = m_RightLineVisual.invalidColorGradient;
-        validRay = m_RightLineVisual.validColorGradient;
-        playerTeleportationGage = GetComponent<TpGage>();
-        //////////////
         
-        if (!DisableSetupForDebug)
+        if (StartingPosition != null)
         {
             transform.position = StartingPosition.position;
             transform.rotation = StartingPosition.rotation;
-            
-            if(TeleporterParent != null)
-                TeleporterParent.SetActive(false);
         }
-        
+
         InputDeviceCharacteristics leftTrackedControllerFilter = InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Left;
         List<InputDevice> foundControllers = new List<InputDevice>();
         
@@ -161,180 +133,5 @@ public class MasterController : MonoBehaviour
     {
         if(Keyboard.current.escapeKey.wasPressedThisFrame)
             Application.Quit();
-        
-        /*
-        RightTeleportUpdate();
-        LeftTeleportUpdate();*/
-    }
-
-    
-    void RightTeleportUpdate()
-    {
-        Vector2 axisInput;
-        m_RightInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
-        
-        m_RightLineVisual.enabled = axisInput.y > 0.5f;
-        
-        RightTeleportInteractor.interactionLayerMask = m_LastFrameRightEnable ? m_OriginalRightMask : new LayerMask();
-
-
-        bool canTeleport = false;
-        /// edited ///
-        if (m_RightLineVisual.enabled)
-        {
-            RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-            
-            if (hit.collider != null)
-            {
-                int hitLayer = hit.collider.gameObject.layer;
-                string hitLayerName = LayerMask.LayerToName(hitLayer);
-                if (hitLayerName == "Teleporter")
-                {
-                    m_RightLineVisual.invalidColorGradient = validRay;
-                    canTeleport = true;
-                }
-                else
-                {
-                    m_RightLineVisual.invalidColorGradient = invalidRay;
-                }
-            }
-     
-
-        }
-        
-        //////////////
-        
-        if (axisInput.y <= 0.5f && m_PreviousRightClicked)
-        {
-            /// edited ///
-            //m_RightController.Select();
-            RightTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-
-            float distance = Vector3.Distance(transform.position, hit.point);
-            if (playerTeleportationGage.CanTeleport(distance))
-            {
-                TeleportRequest teleportRequest = new TeleportRequest();
-                teleportRequest.destinationPosition = hit.point;
-                teleportRequest.destinationRotation = transform.rotation;
-                locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
-                playerTeleportationGage.ConsumeGage(distance);
-            }
-            //////////////
-        }
-
-        /*
-        if (axisInput.y <= -0.5f)
-        {
-            if(!RightTractorBeam.IsTracting)
-                RightTractorBeam.StartTracting();
-        }
-        else if(RightTractorBeam.IsTracting)
-        {
-            RightTractorBeam.StopTracting();
-        }*/
-
-        //if the right animator is null, we try to get it. It's not the best performance wise but no other way as setup
-        //of the model by the Interaction Toolkit is done on the first update.
-        if (m_RightHandPrefab == null)
-        {
-            m_RightHandPrefab = RightDirectInteractor.GetComponentInChildren<HandPrefab>();
-        }
-
-        /// edited ///
-        //m_PreviousRightClicked = axisInput.y > 0.5f;
-        m_PreviousRightClicked = canTeleport;
-        //////////////
-
-        if (m_RightHandPrefab != null)
-        {
-            m_RightHandPrefab.Animator.SetBool("Pointing", axisInput.y > 0.5f);
-        }
-
-        m_LastFrameRightEnable = m_RightLineVisual.enabled;
-    }
-
-    void LeftTeleportUpdate()
-    {
-        Vector2 axisInput;
-        m_LeftInputDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out axisInput);
-
-        m_LeftLineVisual.enabled = axisInput.y > 0.5f;
-
-        LeftTeleportInteractor.interactionLayerMask = m_LastFrameRightEnable ? m_OriginalRightMask : new LayerMask();
-
-
-        bool canTeleport = false;
-        /// edited ///
-        if (m_LeftLineVisual.enabled)
-        {
-            LeftTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-
-            if (hit.collider != null)
-            {
-                int hitLayer = hit.collider.gameObject.layer;
-                string hitLayerName = LayerMask.LayerToName(hitLayer);
-                if (hitLayerName == "Teleporter")
-                {
-                    m_LeftLineVisual.invalidColorGradient = validRay;
-                    canTeleport = true;
-                }
-                else
-                {
-                    m_LeftLineVisual.invalidColorGradient = invalidRay;
-                }
-            }
-
-
-        }
-
-        //////////////
-
-        if (axisInput.y <= 0.5f && m_PreviousLeftClicked)
-        {
-            /// edited ///
-            //m_LeftController.Select();
-            LeftTeleportInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-
-            float distance = Vector3.Distance(transform.position, hit.point);
-            if (playerTeleportationGage.CanTeleport(distance))
-            {
-                TeleportRequest teleportRequest = new TeleportRequest();
-                teleportRequest.destinationPosition = hit.point;
-                teleportRequest.destinationRotation = transform.rotation;
-                locomotionSystem.GetComponent<TeleportationProvider>().QueueTeleportRequest(teleportRequest);
-                playerTeleportationGage.ConsumeGage(distance);
-            }
-            //////////////
-        }
-
-        /*
-        if (axisInput.y <= -0.5f)
-        {
-            if(!LeftTractorBeam.IsTracting)
-                LeftTractorBeam.StartTracting();
-        }
-        else if(LeftTractorBeam.IsTracting)
-        {
-            LeftTractorBeam.StopTracting();
-        }*/
-
-        //if the left animator is null, we try to get it. It's not the best performance wise but no other way as setup
-        //of the model by the Interaction Toolkit is done on the first update.
-        if (m_LeftHandPrefab == null)
-        {
-            m_LeftHandPrefab = LeftDirectInteractor.GetComponentInChildren<HandPrefab>();
-        }
-
-        /// edited ///
-        //m_PreviousLeftClicked = axisInput.y > 0.5f;
-        m_PreviousLeftClicked = canTeleport;
-        //////////////
-
-        if (m_LeftHandPrefab != null)
-        {
-            m_LeftHandPrefab.Animator.SetBool("Pointing", axisInput.y > 0.5f);
-        }
-
-        m_LastFrameLeftEnable = m_LeftLineVisual.enabled;
     }
 }

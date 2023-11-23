@@ -25,7 +25,9 @@ public class MeleeWeapon : MonoBehaviour
 
     [Header("Reference")]
     [SerializeField]
-    private Collider blade;
+    private ChangeTransparency changeBladeTransparency;
+    [SerializeField]
+    LayerMask enemyLayer;
     [SerializeField]
     private GameObject cooldownUI;
     [SerializeField]
@@ -44,15 +46,16 @@ public class MeleeWeapon : MonoBehaviour
         originalUILocalPosition = cooldownUI.GetComponent<RectTransform>().localPosition;
         originalUILocalRotation = cooldownUI.GetComponent<RectTransform>().localRotation;
         oppositeUILocalPosition = originalUILocalPosition;
-        oppositeUILocalPosition.x *= -1;
+        oppositeUILocalPosition.z *= -1;
         oppositeUILocalRotation = Quaternion.Euler(0f, 180f, 0f) * originalUILocalRotation;
     }
 
-    private void OnCollisionEnter(Collision collision)
+
+    public void OnBladeTouched(Collider other)
     {
-        GameObject collidedObject = collision.collider.gameObject;
+        GameObject collidedObject = other.gameObject;
         int collidedLayer = collidedObject.layer;
-        if (LayerMask.LayerToName(collidedLayer) == "Enemy")
+        if (1 << collidedLayer == enemyLayer)
         {
             StartCoroutine(nameof(Swing), collidedObject);
         }
@@ -81,7 +84,7 @@ public class MeleeWeapon : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(cameraPosition, transform.position - cameraPosition, out hit, Mathf.Infinity, 1 << gameObject.layer))
             {
-                if (transform.InverseTransformPoint(hit.point).x > 0)
+                if (transform.InverseTransformPoint(hit.point).z > 0)
                 {
                     cooldownUI.GetComponent<RectTransform>().localPosition = oppositeUILocalPosition;
                     cooldownUI.GetComponent<RectTransform>().localRotation = oppositeUILocalRotation;
@@ -94,6 +97,8 @@ public class MeleeWeapon : MonoBehaviour
             }
 
             imageFill.fillAmount = currentCooldownTime / maxCooldownTime;
+            changeBladeTransparency.Call(1 - imageFill.fillAmount);
+
             textCooldownTime.text = currentCooldownTime.ToString("F1");
             currentCooldownTime -= Time.deltaTime;
             yield return null;
@@ -106,6 +111,8 @@ public class MeleeWeapon : MonoBehaviour
     {
         isCooldown = boolean;
         cooldownUI.SetActive(boolean);
+        changeBladeTransparency.Call(boolean ? 0.0f : 1.0f);
+
     }
 
     private IEnumerator Swing(GameObject targetObject)

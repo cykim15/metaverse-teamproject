@@ -43,14 +43,12 @@ public class Enemy : MonoBehaviour
 
     private bool isAlive = true;
 
-    public float FightDistance => fightDistance;
-
     public Animator animator;
 
 
     private void Awake()
     {
-        navMeshAgent = GetComponent<NavMeshAgent>();
+        navMeshAgent = GetComponentInChildren<NavMeshAgent>();
         navMeshAgent.speed = moveSpeed;
         navMeshAgent.stoppingDistance = fightDistance - 0.2f; // stoppindDistance bias가 0.2 정도 존재하는 것 확인했음
         enemyHP = GetComponent<HP>();

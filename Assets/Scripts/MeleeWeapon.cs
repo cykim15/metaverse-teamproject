@@ -15,7 +15,7 @@ public class MeleeWeapon : MonoBehaviour
     private float speedWeight;
     [SerializeField, Tooltip("휘두르는 세기 = a * speed + b * angularSpeed 일 때, b의 값에 해당합니다.")]
     private float angularSpeedWeight;
-    [SerializeField, Tooltip("휘두르는 세기가 이 값을 넘어야 공격으로 판정됩니다.")]
+    [SerializeField, Tooltip("휘두르는 세기가 해당 값을 넘어야 공격으로 판정됩니다.")]
     private float swingIntensityThreshold;
     [SerializeField, Tooltip("실제 데미지는 휘두르는 세기에 해당 값을 곱하여 계산됩니다.")]
     private float damageWeight;
@@ -25,7 +25,7 @@ public class MeleeWeapon : MonoBehaviour
 
     [Header("Reference")]
     [SerializeField]
-    private ChangeTransparency changeBladeTransparency;
+    private Renderer bladeRenderer;
     [SerializeField]
     LayerMask enemyLayer;
     [SerializeField]
@@ -97,7 +97,7 @@ public class MeleeWeapon : MonoBehaviour
             }
 
             imageFill.fillAmount = currentCooldownTime / maxCooldownTime;
-            changeBladeTransparency.Call(1 - imageFill.fillAmount);
+            ChangeBladeTransparency(1 - imageFill.fillAmount);
 
             textCooldownTime.text = currentCooldownTime.ToString("F1");
             currentCooldownTime -= Time.deltaTime;
@@ -111,7 +111,7 @@ public class MeleeWeapon : MonoBehaviour
     {
         isCooldown = boolean;
         cooldownUI.SetActive(boolean);
-        changeBladeTransparency.Call(boolean ? 0.0f : 1.0f);
+        ChangeBladeTransparency(boolean ? 0.0f : 1.0f);
 
     }
 
@@ -128,14 +128,15 @@ public class MeleeWeapon : MonoBehaviour
         float velocity = Vector3.Distance(position1, position2) / Time.deltaTime;
         float angularVelocity = Quaternion.Angle(rotation1, rotation2) / Time.deltaTime;
 
-        float swingIntensity = velocity + angularVelocity / 1000;
+        float swingIntensity = speedWeight * velocity + angularSpeedWeight * angularVelocity;
+        Debug.Log($"속도: {velocity}, 각속도: {angularVelocity}, 계산된 세기: {swingIntensity}");
 
         if (swingIntensity >= swingIntensityThreshold)
         {
             if (isCooldown == false)
             {
                 float damage = damageWeight * swingIntensity;
-                targetObject.GetComponent<Enemy>().Damaged(damage);
+                targetObject.GetComponent<Enemy>().GetHit(damage);
                 //Debug.Log($"적에게 {damage.ToString("F2")}의 데미지 입힘");
                 StartCooldownTime();
             }
@@ -144,5 +145,13 @@ public class MeleeWeapon : MonoBehaviour
                 //Debug.Log($"다음 공격까지 {currentCooldownTime.ToString("F2")}초 남음");
             }
         }
+    }
+
+    private void ChangeBladeTransparency(float alpha)
+    {
+        Material material = bladeRenderer.material;
+        Color objectColor = material.color;
+        objectColor.a = alpha;
+        material.color = objectColor;
     }
 }

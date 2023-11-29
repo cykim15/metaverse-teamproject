@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,21 +10,19 @@ using UnityEngine.Events;
 /// </summary>
 public class PotionReceiver : MonoBehaviour
 {
-    private bool correctPoured = false;
-
     [System.Serializable]
-    public class PotionPouredEvent : UnityEvent<string> { }
+    public class PotionPouredEvent : UnityEvent<string, float> { }
 
     public string[] AcceptedPotionType;
     
     public PotionPouredEvent OnPotionPoured;
 
-    public void ReceivePotion(string PotionType)
+
+    public void ReceivePotion(string PotionType, float amount)
     {
-        if(AcceptedPotionType.Contains(PotionType) && !correctPoured)
+        if(AcceptedPotionType.Contains(PotionType))
         {
-            OnPotionPoured.Invoke(PotionType);
-            correctPoured = true;
+            OnPotionPoured.Invoke(PotionType, amount);
         }                      
     }
 }

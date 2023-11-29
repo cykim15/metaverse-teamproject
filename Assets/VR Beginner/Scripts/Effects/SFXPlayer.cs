@@ -34,7 +34,7 @@ public class SFXPlayer : MonoBehaviour
     List<int> m_PlayingSources = new List<int>();
     
     AudioSource[] m_SFXSourcePool;
-    CCSource[] m_CcSources;
+    //CCSource[] m_CcSources;
     
     int m_UsedSource = 0;
     
@@ -49,13 +49,13 @@ public class SFXPlayer : MonoBehaviour
         s_Instance = this;
 
         m_SFXSourcePool = new AudioSource[SFXSourceCount];
-        m_CcSources = new CCSource[SFXSourceCount];
+        //m_CcSources = new CCSource[SFXSourceCount];
 
         for (int i = 0; i < SFXSourceCount; ++i)
         {
             m_SFXSourcePool[i] = Instantiate(SFXReferenceSource);
             m_SFXSourcePool[i].gameObject.SetActive(false);
-            m_CcSources[i] = m_SFXSourcePool[i].GetComponent<CCSource>();
+            //m_CcSources[i] = m_SFXSourcePool[i].GetComponent<CCSource>();
         }
     }
 
@@ -116,7 +116,7 @@ public class SFXPlayer : MonoBehaviour
             return;
         
         AudioSource s = m_SFXSourcePool[m_UsedSource];
-        CCSource ccs = m_CcSources[m_UsedSource];
+        //CCSource ccs = m_CcSources[m_UsedSource];
         
         m_PlayingSources.Add(m_UsedSource);
         
@@ -132,7 +132,7 @@ public class SFXPlayer : MonoBehaviour
         
         m_PlayEvents.Add(parameters.SourceID, new PlayEvent() { Time = cooldownTime });
 
-        ccs.enabled = isClosedCaptioned;
+        //ccs.enabled = isClosedCaptioned;
         
         s.Play();
     }

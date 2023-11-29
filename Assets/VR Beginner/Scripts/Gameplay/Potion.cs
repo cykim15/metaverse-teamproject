@@ -15,6 +15,10 @@ public class Potion : MonoBehaviour
     public ParticleSystem particleSystemLiquid;
     public ParticleSystem particleSystemSplash;
     public float fillAmount = 0.8f;
+
+    [SerializeField]
+    private float effectAmount = 30f;
+
     public GameObject popVFX;
     [FormerlySerializedAs("meshRenderer")]
     public MeshRenderer MeshRenderer;
@@ -101,7 +105,7 @@ public class Potion : MonoBehaviour
 
                 if (receiver != null)
                 {
-                    receiver.ReceivePotion(PotionType);
+                    receiver.ReceivePotion(PotionType, (0.1f * Time.deltaTime / m_StartingFillAmount) * effectAmount);
                 }
             }
 
@@ -173,7 +177,6 @@ public class Potion : MonoBehaviour
                 particleSystemSplash.gameObject.SetActive(true);
                 if (fillAmount > 0f)
                 {
-                    Debug.Log("hi");
                     particleSystemSplash.Play();
                 }
             }

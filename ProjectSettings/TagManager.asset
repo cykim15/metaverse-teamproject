@@ -7,6 +7,9 @@ TagManager:
   - Ignite
   - Enemy
   - Obstacles
+  - Test
+  - PotionHP
+  - PotionStamina
   layers:
   - Default
   - TransparentFX
@@ -22,8 +25,8 @@ TagManager:
   - NoHandCollide
   - Obstacle
   - Blade
-  - 
-  - 
+  - Potion
+  - Coin
   - 
   - 
   - 

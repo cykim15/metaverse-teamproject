@@ -4,22 +4,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HPViewer : MonoBehaviour
+public class HPViewer : GageViewer
 {
     [SerializeField]
     private HP hp;
-    [SerializeField]
-    private TextMeshProUGUI textHP;
-    private Slider sliderHP;
 
     private void Awake()
     {
-        sliderHP = GetComponent<Slider>();
-    }
-
-    private void Update()
-    {
-        sliderHP.value = hp.Current / hp.Max;
-        textHP.text = $"체력 {(int)hp.Current}/{hp.Max}";
+        gage = hp;
+        gageName = "체력";
     }
 }

@@ -13,7 +13,7 @@ public class GageViewer : MonoBehaviour
     [SerializeField]
     private Slider slider;
 
-    private void Update()
+    protected virtual void Update()
     {
         slider.value = gage.Current / gage.Max;
         text.text = $"{gageName} {(int)gage.Current}/{gage.Max}";

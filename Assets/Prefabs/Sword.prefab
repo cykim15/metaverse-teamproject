@@ -224,13 +224,14 @@ GameObject:
   - component: {fileID: 754343265}
   - component: {fileID: 754343264}
   - component: {fileID: 754343263}
+  - component: {fileID: 4379214240046727787}
   m_Layer: 6
   m_Name: Cooldown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &754343262
 RectTransform:
   m_ObjectHideFlags: 0
@@ -312,6 +313,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &4379214240046727787
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754343261}
+  m_Enabled: 1
+  m_Alpha: 0.1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &862862815
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,7 +489,7 @@ GameObject:
   - component: {fileID: 1374266123}
   m_Layer: 6
   m_Name: Sword
-  m_TagString: Untagged
+  m_TagString: Sword
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -12,6 +12,10 @@ public class Stamina : Gage
     private float normalRecovery = 1f;
     [SerializeField]
     private float decreaseWhenRun = 5f;
+    [SerializeField]
+    private float runThreshold = 20f;
+
+    public float RunThreshold => runThreshold;
 
     [Header("Reference")]
     [SerializeField]
@@ -20,7 +24,6 @@ public class Stamina : Gage
     private ContinuousMoveProviderBase continuousMoveProvider;
 
     private InputDevice? rightController;
-    private bool beforeButtonPressed = false;
 
     void Start()
     {
@@ -30,13 +33,18 @@ public class Stamina : Gage
     private void Update()
     {
         bool buttonPressed = CheckButtonState(rightController, CommonUsages.secondaryButton);
-        if (buttonPressed != beforeButtonPressed) // 버튼 입력이 바뀔 경우에만 continuous move provider에 접근하여 속도 변경
+
+        if (buttonPressed && Current > runThreshold)
         {
-            continuousMoveProvider.moveSpeed = buttonPressed ? player.RunningSpeed : player.WalkingSpeed;
+            continuousMoveProvider.moveSpeed = player.RunningSpeed;
+        }
+        else
+        {
+            continuousMoveProvider.moveSpeed = player.WalkingSpeed;
         }
 
         float playerCurrentSpeed = player.GetComponent<CharacterController>().velocity.magnitude;
-        if (buttonPressed && Mathf.Abs(player.RunningSpeed - playerCurrentSpeed) < 0.1f)
+        if (buttonPressed && playerCurrentSpeed >= player.WalkingSpeed - 0.1f)
         {
             Current -= decreaseWhenRun * Time.deltaTime;
         }
@@ -44,8 +52,6 @@ public class Stamina : Gage
         {
             Current += normalRecovery * Time.deltaTime;
         }
-
-        beforeButtonPressed = buttonPressed;
 
     }
 

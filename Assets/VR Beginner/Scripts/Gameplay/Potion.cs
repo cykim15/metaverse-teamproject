@@ -41,6 +41,8 @@ public class Potion : MonoBehaviour
     bool m_Breakable;
     float m_StartingFillAmount;
 
+    float realStartingFillAmount;
+
     void OnEnable()
     {
         particleSystemLiquid.Stop();
@@ -74,6 +76,8 @@ public class Potion : MonoBehaviour
         m_AudioSource.loop = true;
 
         m_UniqueId = NextFreeUniqueId++;
+
+        realStartingFillAmount = fillAmount;
     }
 
     void OnDestroy()
@@ -105,7 +109,7 @@ public class Potion : MonoBehaviour
 
                 if (receiver != null)
                 {
-                    receiver.ReceivePotion(PotionType, (0.1f * Time.deltaTime / m_StartingFillAmount) * effectAmount);
+                    receiver.ReceivePotion(PotionType, (0.1f * Time.deltaTime / realStartingFillAmount) * effectAmount);
                 }
             }
 

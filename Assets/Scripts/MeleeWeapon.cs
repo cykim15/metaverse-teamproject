@@ -11,6 +11,8 @@ public class MeleeWeapon : MonoBehaviour
     [Header("Parameter")]
     [SerializeField]
     private float maxCooldownTime;
+    [SerializeField]
+    private float maxDurability = 100f;
     [SerializeField, Tooltip("휘두르는 세기 = a * speed + b * angularSpeed 일 때, a의 값에 해당합니다.")]
     private float speedWeight;
     [SerializeField, Tooltip("휘두르는 세기 = a * speed + b * angularSpeed 일 때, b의 값에 해당합니다.")]
@@ -21,7 +23,10 @@ public class MeleeWeapon : MonoBehaviour
     private float damageWeight;
 
     private float currentCooldownTime;
-    private bool isCooldown;
+    public bool isCooldown;
+    public bool defenseMode = false;
+    private float currentDurability;
+    
 
     [Header("Reference")]
     [SerializeField]
@@ -40,6 +45,8 @@ public class MeleeWeapon : MonoBehaviour
     private Vector3 oppositeUILocalPosition;
     private Quaternion oppositeUILocalRotation;
 
+    
+
     private void Awake()
     {
         SetCooldownIs(false);
@@ -48,6 +55,8 @@ public class MeleeWeapon : MonoBehaviour
         oppositeUILocalPosition = originalUILocalPosition;
         oppositeUILocalPosition.z *= -1;
         oppositeUILocalRotation = Quaternion.Euler(0f, 180f, 0f) * originalUILocalRotation;
+
+        currentDurability = maxDurability;
     }
 
 
@@ -61,6 +70,7 @@ public class MeleeWeapon : MonoBehaviour
         }
     }
 
+    
     private void StartCooldownTime()
     {
         if (isCooldown == true)
@@ -97,7 +107,6 @@ public class MeleeWeapon : MonoBehaviour
             }
 
             imageFill.fillAmount = currentCooldownTime / maxCooldownTime;
-            ChangeBladeTransparency(1 - imageFill.fillAmount);
 
             textCooldownTime.text = currentCooldownTime.ToString("F1");
             currentCooldownTime -= Time.deltaTime;
@@ -111,8 +120,6 @@ public class MeleeWeapon : MonoBehaviour
     {
         isCooldown = boolean;
         cooldownUI.SetActive(boolean);
-        ChangeBladeTransparency(boolean ? 0.0f : 1.0f);
-
     }
 
     private IEnumerator Swing(GameObject targetObject)
@@ -154,4 +161,17 @@ public class MeleeWeapon : MonoBehaviour
         objectColor.a = alpha;
         material.color = objectColor;
     }
+
+    public void DecreaseDurability(float amount)
+    {
+        currentDurability -= amount;
+
+        if (currentDurability < 0)
+        {
+            currentDurability = 0;
+        }
+
+        ChangeBladeTransparency(currentDurability / maxDurability);
+    }
+
 }

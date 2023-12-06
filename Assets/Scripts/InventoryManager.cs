@@ -166,6 +166,10 @@ public class InventoryManager : MonoBehaviour
             GameObject grabbedObject = interactor.selectTarget.gameObject;
             if (IsCollectible(grabbedObject.tag))
             {
+                // 쿨타임이 안끝난 무기는 못 넣음!
+                MeleeWeapon weapon = grabbedObject.GetComponent<MeleeWeapon>();
+                if (weapon != null && weapon.isCooldown == true) return;
+
                 interactor.interactionManager.SelectExit(interactor, interactor.selectTarget);
                 items[CurrentIndex] = grabbedObject;
                 StartCoroutine(WaitAndDeactivate(grabbedObject));

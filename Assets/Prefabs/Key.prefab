@@ -93,7 +93,7 @@ Transform:
   m_GameObject: {fileID: 7713101396639640392}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.91470003, y: 0.98, z: -0.9211}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_Children:
   - {fileID: 7713101395609482385}
   - {fileID: 3346390114537627426}
@@ -270,6 +270,7 @@ MonoBehaviour:
   m_ThrowAngularVelocityScale: 0.25
   m_ForceGravityOnDetach: 0
   m_RetainTransformParent: 1
+  m_AttachPointCompatibilityMode: 0
 --- !u!114 &7713101396639640439
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -28,6 +28,7 @@ public class InventoryManager : MonoBehaviour
     {
         public Image background;
         public Image icon;
+        public GameObject slider;
     }
 
     [Header("Parameter")]
@@ -175,6 +176,20 @@ public class InventoryManager : MonoBehaviour
                 StartCoroutine(WaitAndDeactivate(grabbedObject));
                 itemImages[CurrentIndex].icon.sprite = FindIconWithTag(grabbedObject.tag);
                 itemImages[CurrentIndex].icon.enabled = true;
+                
+                // 무기면 내구도를 게이지에 반영
+                if (weapon != null)
+                {
+                    itemImages[CurrentIndex].slider.SetActive(true);
+                    itemImages[CurrentIndex].slider.GetComponent<Slider>().value = weapon.CurrentDurability / weapon.MaxDurability;
+                }
+                // 포션이면 남은 양을 게이지에 반영
+                else if (grabbedObject.tag == "PotionHP" || grabbedObject.tag == "PotionStamina")
+                {
+                    Potion potion = grabbedObject.GetComponent<Potion>();
+                    itemImages[CurrentIndex].slider.SetActive(true);
+                    itemImages[CurrentIndex].slider.GetComponent<Slider>().value = potion.fillAmount / potion.RealStartingFillAmount;
+                }
             }
         }
 
@@ -192,6 +207,7 @@ public class InventoryManager : MonoBehaviour
 
             items[CurrentIndex] = null;
             itemImages[CurrentIndex].icon.enabled = false;
+            itemImages[CurrentIndex].slider.SetActive(false);
         }
     }
 

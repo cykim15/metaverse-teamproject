@@ -82,7 +82,16 @@ public class MeleeWeapon : MonoBehaviour
         }
     }
 
-    
+    public void StartCooldownTimeWhenSelected()
+    {
+        if (isCooldown == true)
+        {
+            return;
+        }
+
+        StartCoroutine(nameof(OnCooldownTime), 0.1f);
+    }
+
     private void StartCooldownTime()
     {
         if (isCooldown == true)

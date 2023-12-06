@@ -42,6 +42,7 @@ public class Potion : MonoBehaviour
     float m_StartingFillAmount;
 
     float realStartingFillAmount;
+    public float RealStartingFillAmount => realStartingFillAmount;
 
     void OnEnable()
     {

@@ -374,6 +374,15 @@ public class Enemy : MonoBehaviour
 
     public void HitPlayer()
     {
-        player.GetComponent<Player>().GetHit(damage + Random.Range(-damageTolerance, damageTolerance));
+        float actualDamage = damage + Random.Range(-damageTolerance, damageTolerance);
+        player.GetComponent<Player>().GetHit(actualDamage);
+
+        List<MeleeWeapon> defendingMeleeWeapons = player.GetComponent<Player>().defendingWeapons;
+
+        foreach (MeleeWeapon weapon in defendingMeleeWeapons)
+        {
+            weapon.DecreaseDurability(actualDamage, true);
+        }
+
     }
 }

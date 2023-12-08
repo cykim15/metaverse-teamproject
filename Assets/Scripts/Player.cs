@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class Player : MonoBehaviour
 {
@@ -17,10 +18,15 @@ public class Player : MonoBehaviour
     public float WalkingSpeed => walkingSpeed;
     public float RunningSpeed => runningSpeed;
 
+    public List<MeleeWeapon> defendingWeapons;
+
+    public List<GameObject> grabbingObjects;
+
     private void Awake()
     {
         playerHP = GetComponent<HP>();
         playerStamina = GetComponent<Stamina>();
+        defendingWeapons = new List<MeleeWeapon>();
     }
 
     public void GetHit(float amount)
@@ -48,4 +54,5 @@ public class Player : MonoBehaviour
             playerStamina.Increase(amount);
         }
     }
+
 }

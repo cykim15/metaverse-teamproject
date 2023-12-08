@@ -15,7 +15,7 @@ public class InventoryManager : MonoBehaviour
     private bool rightAButtonPressed = false;
     //private bool rightBButtonPressed = false;
 
-    
+
     [System.Serializable]
     private class CollectibleItem
     {
@@ -28,6 +28,7 @@ public class InventoryManager : MonoBehaviour
     {
         public Image background;
         public Image icon;
+        public GameObject slider;
     }
 
     [Header("Parameter")]
@@ -49,7 +50,7 @@ public class InventoryManager : MonoBehaviour
     public int CurrentIndex
     {
         get
-        { 
+        {
             return currentIndex;
         }
         set
@@ -119,7 +120,8 @@ public class InventoryManager : MonoBehaviour
                 {
                     SelectNextItem();
                 }
-                else if (buttonName == "leftX") {
+                else if (buttonName == "leftX")
+                {
                     InsertOrTakeOutItem(true);
                 }
                 else if (buttonName == "rightA")
@@ -158,7 +160,7 @@ public class InventoryManager : MonoBehaviour
     {
         XRDirectInteractor interactor;
         if (isLeft) interactor = leftDirectInteractor;
-        else interactor= rightDirectInteractor;
+        else interactor = rightDirectInteractor;
 
         // Insert
         if (items[CurrentIndex] == null && interactor.selectTarget)
@@ -175,6 +177,20 @@ public class InventoryManager : MonoBehaviour
                 StartCoroutine(WaitAndDeactivate(grabbedObject));
                 itemImages[CurrentIndex].icon.sprite = FindIconWithTag(grabbedObject.tag);
                 itemImages[CurrentIndex].icon.enabled = true;
+
+                // 무기면 내구도를 게이지에 반영
+                if (weapon != null)
+                {
+                    itemImages[CurrentIndex].slider.SetActive(true);
+                    itemImages[CurrentIndex].slider.GetComponent<Slider>().value = weapon.CurrentDurability / weapon.MaxDurability;
+                }
+                // 포션이면 남은 양을 게이지에 반영
+                else if (grabbedObject.tag == "PotionHP" || grabbedObject.tag == "PotionStamina")
+                {
+                    Potion potion = grabbedObject.GetComponent<Potion>();
+                    itemImages[CurrentIndex].slider.SetActive(true);
+                    itemImages[CurrentIndex].slider.GetComponent<Slider>().value = potion.fillAmount / potion.RealStartingFillAmount;
+                }
             }
         }
 
@@ -192,6 +208,7 @@ public class InventoryManager : MonoBehaviour
 
             items[CurrentIndex] = null;
             itemImages[CurrentIndex].icon.enabled = false;
+            itemImages[CurrentIndex].slider.SetActive(false);
         }
     }
 
@@ -204,7 +221,7 @@ public class InventoryManager : MonoBehaviour
     private Sprite FindIconWithTag(string tag)
     {
         int i;
-        for (i=0; i<collectibleItems.Length; i++)
+        for (i = 0; i < collectibleItems.Length; i++)
         {
             if (collectibleItems[i].tag == tag)
             {

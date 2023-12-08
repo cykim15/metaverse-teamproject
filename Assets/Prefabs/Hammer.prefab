@@ -630,10 +630,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCooldownTime: 3
+  maxDurability: 100
   speedWeight: 1
   angularSpeedWeight: 0.001
   swingIntensityThreshold: 5
   damageWeight: 1
+  durabilityAttackWeight: 1
+  durabilityDefendWeight: 0
+  throwingWeapon: 0
+  throwingDamageWeight: 0
+  isCooldown: 0
+  defenseMode: 0
+  player: {fileID: 0}
   bladeRenderer: {fileID: 8865517089369312681}
   enemyLayer:
     serializedVersion: 2

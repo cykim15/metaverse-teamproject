@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class Potion : MonoBehaviour
 {
     static int NextFreeUniqueId = 3000;
-    
+
     public string PotionType = "Default";
     public GameObject plugObj;
     public ParticleSystem particleSystemLiquid;
@@ -24,12 +24,12 @@ public class Potion : MonoBehaviour
     public MeshRenderer MeshRenderer;
     [FormerlySerializedAs("smashedObject")]
     public GameObject SmashedObject;
-    
+
     [Header("Audio")]
     public AudioClip PouringClip;
     public AudioClip[] PoppingPlugAudioClip;
     public AudioClip[] BreakingAudioClips;
-    
+
     bool m_PlugIn = true;
     Rigidbody m_PlugRb;
     MaterialPropertyBlock m_MaterialPropertyBlock;
@@ -42,14 +42,15 @@ public class Potion : MonoBehaviour
     float m_StartingFillAmount;
 
     float realStartingFillAmount;
+    public float RealStartingFillAmount => realStartingFillAmount;
 
     void OnEnable()
     {
         particleSystemLiquid.Stop();
-        
-        if(particleSystemSplash)
+
+        if (particleSystemSplash)
             particleSystemSplash.Stop();
-        
+
         m_MaterialPropertyBlock = new MaterialPropertyBlock();
         m_MaterialPropertyBlock.SetFloat("LiquidFill", fillAmount);
 
@@ -95,7 +96,7 @@ public class Potion : MonoBehaviour
                 particleSystemLiquid.Play();
                 m_AudioSource.Play();
             }
-            
+
             fillAmount -= 0.1f * Time.deltaTime;
 
             float fillRatio = fillAmount / m_StartingFillAmount;
@@ -113,7 +114,7 @@ public class Potion : MonoBehaviour
                 }
             }
 
-        } 
+        }
         else
         {
             particleSystemLiquid.Stop();
@@ -151,7 +152,7 @@ public class Potion : MonoBehaviour
                 SourceID = -99
             });
         }
-        
+
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -167,7 +168,7 @@ public class Potion : MonoBehaviour
                 Collider c;
                 if (plugObj.TryGetComponent(out c))
                     c.enabled = true;
-                
+
                 Destroy(plugObj, 4.0f);
             }
 
@@ -175,9 +176,9 @@ public class Potion : MonoBehaviour
             {
                 child.gameObject.SetActive(false);
             }
-            
+
             if (particleSystemSplash != null)
-            {       
+            {
                 particleSystemSplash.gameObject.SetActive(true);
                 if (fillAmount > 0f)
                 {
@@ -202,6 +203,6 @@ public class Potion : MonoBehaviour
 
             Destroy(SmashedObject, 4.0f);
             Destroy(this);
-        }      
+        }
     }
 }

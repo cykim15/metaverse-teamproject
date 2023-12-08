@@ -97,7 +97,7 @@ public class Enemy : MonoBehaviour
     private Vector3 originalPosition;
     private Quaternion originalRotation;
 
-    
+
 
     private float playerEyeHeight = 1.5f;
 
@@ -148,7 +148,7 @@ public class Enemy : MonoBehaviour
                     {
                         isFighting = true;
                         textHP.enabled = true;
-                        Debug.Log("전투 시작");
+                        //Debug.Log("전투 시작");
                         animator.SetBool("onCombat", true);
                     }
                 }
@@ -158,7 +158,7 @@ public class Enemy : MonoBehaviour
                 {
                     detected = false;
                     navMeshAgent.stoppingDistance = 0f; // 기존 waypoint로 온전히 돌아가기 위함
-                }  
+                }
             }
 
             // 범위와 시야각 밖의 경우
@@ -241,7 +241,7 @@ public class Enemy : MonoBehaviour
             // 에러 처리, navMeshAgent가 너무 가까이 왔을 때 강제 중단
             if (navMeshAgent.enabled && Vector3.Distance(transform.position, player.transform.position) < fightDistance - 0.2f)
             {
-                Debug.Log("너무 가까이 붙음! 네비게이션 강제 종료");
+                //Debug.Log("너무 가까이 붙음! 네비게이션 강제 종료");
                 navMeshAgent.enabled = false;
             }
 
@@ -251,7 +251,7 @@ public class Enemy : MonoBehaviour
                 StartCoroutine(Combat());
             }
 
-            
+
             RaycastHit hit;
             bool cannotSeePlayer = Physics.Raycast(enemyEyes.position, player.transform.position + new Vector3(0, playerEyeHeight, 0) - enemyEyes.position, out hit, detectionRange, ~ignoreLayer) && hit.collider.gameObject != player;
 
@@ -263,7 +263,7 @@ public class Enemy : MonoBehaviour
                 combatCoroutineEnabled = false;
                 detected = false;
                 animator.SetBool("onCombat", false);
-                Debug.Log("추적 재개");
+                //Debug.Log("추적 재개");
             }
             else
             {
@@ -340,7 +340,6 @@ public class Enemy : MonoBehaviour
 
         navMeshAgent.enabled = false;
         yield return new WaitForSeconds(1f);
-        
 
         if (directionToPlayer != Vector3.zero)
         {
@@ -360,7 +359,7 @@ public class Enemy : MonoBehaviour
     {
         if (speed >= 0 && speed < walkingSpeed)
         {
-            return Mathf.Lerp(0f, 0.5f, speed / walkingSpeed); 
+            return Mathf.Lerp(0f, 0.5f, speed / walkingSpeed);
         }
         else if (speed >= walkingSpeed)
         {
@@ -374,6 +373,31 @@ public class Enemy : MonoBehaviour
 
     public void HitPlayer()
     {
-        player.GetComponent<Player>().GetHit(damage + Random.Range(-damageTolerance, damageTolerance));
+        float actualDamage = damage + Random.Range(-damageTolerance, damageTolerance);
+        List<MeleeWeapon> defendingMeleeWeapons = player.GetComponent<Player>().defendingWeapons;
+
+        if (defendingMeleeWeapons.Count == 0)
+        {
+            player.GetComponent<Player>().GetHit(actualDamage);
+        }
+
+        else
+        {
+            bool playerCanDefend = false;
+
+            foreach (MeleeWeapon weapon in defendingMeleeWeapons)
+            {
+                if (weapon.CurrentDurability > 0f)
+                {
+                    playerCanDefend = true;
+                    weapon.DecreaseDurability(actualDamage, true);
+                }
+            }
+
+            if (playerCanDefend == false)
+            {
+                player.GetComponent<Player>().GetHit(actualDamage);
+            }
+        }
     }
 }

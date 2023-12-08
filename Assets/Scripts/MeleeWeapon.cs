@@ -21,14 +21,27 @@ public class MeleeWeapon : MonoBehaviour
     private float swingIntensityThreshold;
     [SerializeField, Tooltip("실제 데미지는 휘두르는 세기에 해당 값을 곱하여 계산됩니다.")]
     private float damageWeight;
+    [SerializeField, Tooltip("공격할 때 가한 데미지에 해당 값을 곱한 값만큼 무기의 내구도가 줄어듭니다.")]
+    private float durabilityAttackWeight;
+    [SerializeField, Tooltip("방어할 때 받은 데미지에 해당 값을 곱한 값만큼 무기의 내구도가 줄어듭니다.")]
+    private float durabilityDefendWeight;
+    [SerializeField]
+    private bool throwingWeapon = false;
+    [SerializeField]
+    private float throwingDamageWeight;
 
     private float currentCooldownTime;
     public bool isCooldown;
     public bool defenseMode = false;
     private float currentDurability;
-    
+
+    public float MaxDurability => maxDurability;
+    public float CurrentDurability => currentDurability;
+
 
     [Header("Reference")]
+    [SerializeField]
+    private Player player;
     [SerializeField]
     private Renderer bladeRenderer;
     [SerializeField]
@@ -45,7 +58,7 @@ public class MeleeWeapon : MonoBehaviour
     private Vector3 oppositeUILocalPosition;
     private Quaternion oppositeUILocalRotation;
 
-    
+
 
     private void Awake()
     {
@@ -62,15 +75,40 @@ public class MeleeWeapon : MonoBehaviour
 
     public void OnBladeTouched(Collider other)
     {
+        if (currentDurability == 0f)
+        {
+            return;
+        }
+
         GameObject collidedObject = other.gameObject;
         int collidedLayer = collidedObject.layer;
-        if (1 << collidedLayer == enemyLayer)
+
+        if (1 << collidedLayer != enemyLayer)
+        {
+            return;
+        }
+
+        // 근접
+        if (player.grabbingObjects.Contains(gameObject))
         {
             StartCoroutine(nameof(Swing), collidedObject);
         }
+
+        // 투척
+        else
+        {
+            if (throwingWeapon)
+            {
+                StartCoroutine(nameof(Swing), collidedObject);
+            }
+        }
+
+
+
+
     }
 
-    
+
     private void StartCooldownTime()
     {
         if (isCooldown == true)
@@ -142,9 +180,20 @@ public class MeleeWeapon : MonoBehaviour
         {
             if (isCooldown == false)
             {
-                float damage = damageWeight * swingIntensity;
+                float damage;
+
+                if (throwingWeapon && player.grabbingObjects.Contains(gameObject) == false)
+                {
+                    damage = throwingDamageWeight * swingIntensity;
+                }
+                else
+                {
+                    damage = damageWeight * swingIntensity;
+                }
+
                 targetObject.GetComponent<Enemy>().GetHit(damage);
                 //Debug.Log($"적에게 {damage.ToString("F2")}의 데미지 입힘");
+                DecreaseDurability(damage, false);
                 StartCooldownTime();
             }
             else
@@ -162,9 +211,11 @@ public class MeleeWeapon : MonoBehaviour
         material.color = objectColor;
     }
 
-    public void DecreaseDurability(float amount)
+    public void DecreaseDurability(float damage, bool isDefense)
     {
-        currentDurability -= amount;
+        float weight = isDefense ? durabilityDefendWeight : durabilityAttackWeight;
+        Debug.Log($"내구도 {damage * weight} 줄음");
+        currentDurability -= damage * weight;
 
         if (currentDurability < 0)
         {

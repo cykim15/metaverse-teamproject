@@ -10,8 +10,10 @@ public class EventBackup : MonoBehaviour
 
     public void Call()
     {
-        StartCoroutine(WaitAndInvokeEvent());
+        selectEntered?.Invoke();
+        //StartCoroutine(WaitAndInvokeEvent());
     }
+
     public IEnumerator WaitAndInvokeEvent()
     {
         yield return new WaitForSeconds(0.1f);

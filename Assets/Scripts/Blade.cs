@@ -8,8 +8,25 @@ public class Blade : MonoBehaviour
     [SerializeField]
     private UnityEvent<Collider> onHit;
 
+    private bool detectCollision = true;
+
     private void OnTriggerEnter(Collider other)
     {
-        onHit?.Invoke(other);
+        if (detectCollision)
+        {
+            onHit?.Invoke(other);
+        }
+    }
+
+    private void OnEnable()
+    {
+        detectCollision = false;
+        StartCoroutine(WaitAndEnableDetectCollision());
+    }
+
+    private IEnumerator WaitAndEnableDetectCollision()
+    {
+        yield return new WaitForSeconds(0.1f);
+        detectCollision = true;
     }
 }

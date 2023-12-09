@@ -7,6 +7,8 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class Player : MonoBehaviour
 {
+    public static Player Instance;
+
     private HP playerHP;
     private Stamina playerStamina;
 
@@ -24,6 +26,8 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
+
         playerHP = GetComponent<HP>();
         playerStamina = GetComponent<Stamina>();
         defendingWeapons = new List<MeleeWeapon>();

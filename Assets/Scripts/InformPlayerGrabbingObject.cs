@@ -5,9 +5,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class InformPlayerGrabbingObject : MonoBehaviour
 {
-    [SerializeField]
-    private Player player;
-
     private XRDirectInteractor interactor;
 
     private GameObject grabbingObject;
@@ -20,11 +17,11 @@ public class InformPlayerGrabbingObject : MonoBehaviour
     public void Add()
     {
         grabbingObject = interactor.selectTarget.gameObject;
-        player.grabbingObjects.Add(grabbingObject);
+        Player.Instance.grabbingObjects.Add(grabbingObject);
     }
 
     public void Remove()
     {
-        player.grabbingObjects.Remove(grabbingObject);
+        Player.Instance.grabbingObjects.Remove(grabbingObject);
     }
 }

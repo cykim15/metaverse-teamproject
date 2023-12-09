@@ -198,6 +198,7 @@ public class InventoryManager : MonoBehaviour
         else if (items[CurrentIndex] != null && !interactor.selectTarget)
         {
             items[CurrentIndex].SetActive(true);
+            items[CurrentIndex].transform.position = itemImages[CurrentIndex].icon.rectTransform.position;
             interactor.interactionManager.ForceSelect(interactor, items[CurrentIndex].GetComponent<XRBaseInteractable>());
 
             EventBackup eventBackup = items[CurrentIndex].GetComponent<EventBackup>();

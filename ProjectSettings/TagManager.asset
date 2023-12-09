@@ -14,6 +14,7 @@ TagManager:
   - Sword
   - Spear
   - Hammer
+  - Key
   layers:
   - Default
   - TransparentFX
@@ -32,9 +33,9 @@ TagManager:
   - Potion
   - Coin
   - Key
-  - 
-  - 
-  - 
+  - DoorActivate
+  - ColliderForDoor
+  - DoorDeactivate
   - 
   - 
   - 

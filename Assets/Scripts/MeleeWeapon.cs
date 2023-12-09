@@ -58,8 +58,6 @@ public class MeleeWeapon : MonoBehaviour
     private Vector3 oppositeUILocalPosition;
     private Quaternion oppositeUILocalRotation;
 
-
-
     private void Awake()
     {
         SetCooldownIs(false);
@@ -174,7 +172,7 @@ public class MeleeWeapon : MonoBehaviour
         float angularVelocity = Quaternion.Angle(rotation1, rotation2) / Time.deltaTime;
 
         float swingIntensity = speedWeight * velocity + angularSpeedWeight * angularVelocity;
-        Debug.Log($"속도: {velocity}, 각속도: {angularVelocity}, 계산된 세기: {swingIntensity}");
+        //Debug.Log($"속도: {velocity}, 각속도: {angularVelocity}, 계산된 세기: {swingIntensity}");
 
         if (swingIntensity >= swingIntensityThreshold)
         {
@@ -203,7 +201,7 @@ public class MeleeWeapon : MonoBehaviour
         }
     }
 
-    private void ChangeBladeTransparency(float alpha)
+    public void ChangeBladeTransparency(float alpha)
     {
         Material material = bladeRenderer.material;
         Color objectColor = material.color;

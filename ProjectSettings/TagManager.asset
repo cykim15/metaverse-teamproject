@@ -15,6 +15,7 @@ TagManager:
   - Spear
   - Hammer
   - Key
+  - Anvil
   layers:
   - Default
   - TransparentFX
@@ -36,8 +37,8 @@ TagManager:
   - DoorActivate
   - ColliderForDoor
   - DoorDeactivate
-  - 
-  - 
+  - CoinUsage
+  - ColliderForCoin
   - 
   - 
   - 

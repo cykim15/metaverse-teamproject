@@ -8,6 +8,8 @@ public class DescribeUI : MonoBehaviour
     private float startToViewDistance = 3.5f;
     [SerializeField]
     private float startToOpaqueDistance = 3f;
+    [SerializeField]
+    private float startToDisableDistance = 0.2f;
 
     private CanvasGroup canvasGroup;
 
@@ -30,9 +32,13 @@ public class DescribeUI : MonoBehaviour
             float alpha = Mathf.InverseLerp(startToViewDistance, startToOpaqueDistance, distance);
             canvasGroup.alpha = alpha;
         }
-        else
+        else if (distance > startToDisableDistance)
         {
             canvasGroup.alpha = 1f;
+        }
+        else
+        {
+            canvasGroup.alpha = 0f;
         }
     }
 }

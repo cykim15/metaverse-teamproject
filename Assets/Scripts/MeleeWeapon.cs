@@ -100,10 +100,6 @@ public class MeleeWeapon : MonoBehaviour
                 StartCoroutine(nameof(Swing), collidedObject);
             }
         }
-
-
-
-
     }
 
 
@@ -189,10 +185,19 @@ public class MeleeWeapon : MonoBehaviour
                     damage = damageWeight * swingIntensity;
                 }
 
-                targetObject.GetComponent<Enemy>().GetHit(damage);
-                //Debug.Log($"적에게 {damage.ToString("F2")}의 데미지 입힘");
-                DecreaseDurability(damage, false);
-                StartCooldownTime();
+                Enemy enemy = targetObject.GetComponent<Enemy>();
+                if (enemy != null)
+                {
+                    enemy.GetHit(damage);
+                    //Debug.Log($"적에게 {damage.ToString("F2")}의 데미지 입힘");
+                    DecreaseDurability(damage, false);
+                    StartCooldownTime();
+                }
+                else
+                {
+                    Debug.Log(targetObject);
+                }
+                
             }
             else
             {
@@ -218,6 +223,18 @@ public class MeleeWeapon : MonoBehaviour
         if (currentDurability < 0)
         {
             currentDurability = 0;
+        }
+
+        ChangeBladeTransparency(currentDurability / maxDurability);
+    }
+
+    public void IncreaseDurability(float amount)
+    {
+        currentDurability += amount;
+
+        if (currentDurability > maxDurability)
+        {
+            currentDurability = maxDurability;
         }
 
         ChangeBladeTransparency(currentDurability / maxDurability);

@@ -24,7 +24,10 @@ public class Coin : MonoBehaviour
         if (1 << other.gameObject.layer == colliderForCoinLayer)
         {
             coinUsage = other.GetComponent<ActivateWithCoin>();
-            canUse = true;
+            if (coinUsage != null && coinUsage.activated == false)
+            {
+                canUse = true;
+            }
         }
     }
 

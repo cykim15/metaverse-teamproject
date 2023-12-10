@@ -37,7 +37,7 @@ TagManager:
   - DoorActivate
   - ColliderForDoor
   - DoorDeactivate
-  - CoinUsage
+  - Anvil
   - ColliderForCoin
   - 
   - 

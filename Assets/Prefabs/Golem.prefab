@@ -365,7 +365,7 @@ MonoBehaviour:
   animator: {fileID: 1132232954947502897}
   ignoreLayer:
     serializedVersion: 2
-    m_Bits: 58080
+    m_Bits: 386016
   onAttack1:
     m_PersistentCalls:
       m_Calls:

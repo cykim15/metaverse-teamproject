@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 5487172192324407305}
   - component: {fileID: 5487172192325374665}
   - component: {fileID: 5487172192321282729}
-  m_Layer: 17
+  m_Layer: 0
   m_Name: outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -536,6 +536,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.017
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.65563685
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7550219
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388083594580463893, guid: 65414a0c65712214db964c23b90bb654,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 98.06
       objectReference: {fileID: 0}
     - target: {fileID: 5483479806242436486, guid: 65414a0c65712214db964c23b90bb654,
         type: 3}

@@ -28,6 +28,13 @@ public class Coin : MonoBehaviour
             {
                 canUse = true;
             }
+
+            Chest chest = coinUsage.GetComponentInParent<Chest>();
+            if (chest != null)
+            {
+                chest.collidingCoin = this;
+            }
+            
         }
     }
 
@@ -35,6 +42,11 @@ public class Coin : MonoBehaviour
     {
         if (1 << other.gameObject.layer == colliderForCoinLayer)
         {
+            Chest chest = coinUsage.GetComponentInParent<Chest>();
+            if (chest != null)
+            {
+                chest.collidingCoin = null;
+            }
             coinUsage = null;
             canUse = false;
         }

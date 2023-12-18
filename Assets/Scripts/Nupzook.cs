@@ -38,6 +38,18 @@ public class Nupzook : MonoBehaviour
     private float attack2DamageTolerance;
     [SerializeField]
     private float skill1Damage;
+    [SerializeField]
+    private float throw1Damage;
+    [SerializeField]
+    private float throw1DamageTolerance;
+    [SerializeField]
+    private float throw2Damage;
+    [SerializeField]
+    private float throw2DamageTolerance;
+    [SerializeField]
+    private float skill2Damage;
+    [SerializeField]
+    private GameObject fire;
 
     private Player player;
     private NavMeshAgent navMeshAgent;
@@ -139,6 +151,10 @@ public class Nupzook : MonoBehaviour
                 CheckDistanceAndChangeCombatState();
                 if (combatState != CombatState.FarCombat) continue;
 
+                StartCoroutine("RotateY", 4);
+                animator.SetTrigger("skill2");
+
+                /*
                 int random = Random.Range(0, 5);
                 if (random < 2) // 40%
                 {
@@ -152,7 +168,7 @@ public class Nupzook : MonoBehaviour
                 {
                     StartCoroutine("RotateY", 7);
                     animator.SetTrigger("skill2");
-                }
+                }*/
             }
             
 
@@ -223,6 +239,24 @@ public class Nupzook : MonoBehaviour
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(targetRotation), rotationSpeed * Time.deltaTime);
             yield return null;
+        }
+    }
+
+    public void SpawnFire()
+    {
+        ParticleSystem[] fireParticleSystems = fire.GetComponentsInChildren<ParticleSystem>();
+        foreach (ParticleSystem particleSystem in fireParticleSystems)
+        {
+            particleSystem.Play();
+        }
+    }
+
+    public void DestroyFire()
+    {
+        ParticleSystem[] fireParticleSystems = fire.GetComponentsInChildren<ParticleSystem>();
+        foreach (ParticleSystem particleSystem in fireParticleSystems)
+        {
+            particleSystem.Stop();
         }
     }
 }

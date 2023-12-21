@@ -412,7 +412,6 @@ MonoBehaviour:
   CloseCaptioned: 1
   Clips:
   - {fileID: 8300000, guid: 90e446b109c1ec24c9287706dc4b4a70, type: 3}
-  - {fileID: 8300000, guid: f3911c4c25860e0479c9834b1b29d1c6, type: 3}
 --- !u!114 &893271210
 MonoBehaviour:
   m_ObjectHideFlags: 0

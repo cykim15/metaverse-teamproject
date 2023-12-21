@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem.HID;
+using UnityEngine.Events;
 
 public class MeleeWeapon : MonoBehaviour
 {
@@ -29,6 +30,11 @@ public class MeleeWeapon : MonoBehaviour
     private bool throwingWeapon = false;
     [SerializeField]
     private float throwingDamageWeight;
+    [SerializeField]
+    private UnityEvent onAttack;
+
+    private float swordDamageWeightToGolem = 0.5f;
+    private float hammerDamageWeightToGolem = 1.2f;
 
     private float currentCooldownTime;
     public bool isCooldown;
@@ -40,7 +46,7 @@ public class MeleeWeapon : MonoBehaviour
 
 
     [Header("Reference")]
-    [SerializeField]
+    //[SerializeField]
     private Player player;
     [SerializeField]
     private Renderer bladeRenderer;
@@ -52,11 +58,22 @@ public class MeleeWeapon : MonoBehaviour
     private Image imageFill;
     [SerializeField]
     private TextMeshProUGUI textCooldownTime;
+    [SerializeField]
+    private GameObject effectPrefab;
 
     private Vector3 originalUILocalPosition;
     private Quaternion originalUILocalRotation;
     private Vector3 oppositeUILocalPosition;
     private Quaternion oppositeUILocalRotation;
+
+    private Vector3 effectPosition;
+
+    [SerializeField]
+    private GameObject defendEffectPrefab;
+    [SerializeField]
+    private Transform defendEffectPoint;
+    [SerializeField]
+    private AudioClip audioClipDefend;
 
     private void Awake()
     {
@@ -70,8 +87,14 @@ public class MeleeWeapon : MonoBehaviour
         currentDurability = maxDurability;
     }
 
+    private void Start()
+    {
+        player = Player.Instance;
+        onAttack.AddListener(SpawnEffect);
+    }
 
-    public void OnBladeTouched(Collider other)
+
+    public void OnBladeTouched(Collider other, Vector3 bladePosition)
     {
         if (currentDurability == 0f)
         {
@@ -85,6 +108,8 @@ public class MeleeWeapon : MonoBehaviour
         {
             return;
         }
+
+        effectPosition = other.ClosestPointOnBounds(bladePosition);
 
         // ±Ÿ¡¢
         if (player.grabbingObjects.Contains(gameObject))
@@ -188,16 +213,21 @@ public class MeleeWeapon : MonoBehaviour
                 Enemy enemy = targetObject.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    enemy.GetHit(damage);
-                    //Debug.Log($"¿˚ø°∞‘ {damage.ToString("F2")}¿« µ•πÃ¡ˆ ¿‘»˚");
-                    DecreaseDurability(damage, false);
-                    StartCooldownTime();
+                    if (gameObject.tag == "Sword" && enemy.enemyName == "∞Ò∑Ω") damage *= swordDamageWeightToGolem;
+                    if (gameObject.tag == "Hammer" && enemy.enemyName == "∞Ò∑Ω") damage *= hammerDamageWeightToGolem;
+
+                    enemy.GetHit(damage);   
                 }
-                else
+
+                Nupzook boss = targetObject.GetComponent<Nupzook>();
+                if (boss != null)
                 {
-                    Debug.Log(targetObject);
+                    boss.GetHit(damage);
                 }
-                
+                DecreaseDurability(damage, false);
+                onAttack?.Invoke();
+                StartCooldownTime();
+
             }
             else
             {
@@ -240,4 +270,14 @@ public class MeleeWeapon : MonoBehaviour
         ChangeBladeTransparency(currentDurability / maxDurability);
     }
 
+    private void SpawnEffect()
+    {
+        Instantiate(effectPrefab, effectPosition, Quaternion.identity);
+    }
+
+    public void DefendEffect()
+    {
+        Instantiate(defendEffectPrefab, defendEffectPoint);
+        GetComponent<PlaySFX>().Call(audioClipDefend);
+    }
 }

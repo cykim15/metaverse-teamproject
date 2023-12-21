@@ -35,13 +35,13 @@ TagManager:
   - Coin
   - Key
   - DoorActivate
-  - ColliderForDoor
+  - ColliderForDoorAndBossPotion
   - DoorDeactivate
   - Anvil
   - ColliderForCoin
-  - 
-  - 
-  - 
+  - HammerForAnvil
+  - NupzookChair
+  - BossPotion
   - 
   - 
   - 

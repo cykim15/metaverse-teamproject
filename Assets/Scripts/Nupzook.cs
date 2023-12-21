@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 using UnityEngine.ProBuilder.MeshOperations;
+using static UnityEngine.GraphicsBuffer;
 
 public class Nupzook : MonoBehaviour
 {
+    public static Nupzook Instance;
+
     private enum CombatState { None, Move, CloseCombat, FarCombat }
     private CombatState combatState = CombatState.None;
 
@@ -29,36 +33,49 @@ public class Nupzook : MonoBehaviour
     [SerializeField]
     private float farCombatCooltimeTolerance = 1f;
     [SerializeField]
-    private float attack1Damage;
+    private float attackDamage;
     [SerializeField]
-    private float attack1DamageTolerance;
-    [SerializeField]
-    private float attack2Damage;
-    [SerializeField]
-    private float attack2DamageTolerance;
+    private float attackDamageTolerance;
     [SerializeField]
     private float skill1Damage;
     [SerializeField]
-    private float throw1Damage;
+    private float skill1Radius;
     [SerializeField]
-    private float throw1DamageTolerance;
+    private float throwDamage;
     [SerializeField]
-    private float throw2Damage;
-    [SerializeField]
-    private float throw2DamageTolerance;
+    private float throwDamageTolerance;
     [SerializeField]
     private float skill2Damage;
     [SerializeField]
     private GameObject fire;
+    [SerializeField]
+    private float fireRange;
+    [SerializeField]
+    private LayerMask ignoreLayer;
+
+    [SerializeField]
+    private Transform rightHandTransform;
+    [SerializeField]
+    private GameObject potion1;
+    [SerializeField]
+    private GameObject potion2;
+    [SerializeField]
+    private GameObject skill1EffectPrefab;
+    [SerializeField]
+    private Transform skill1EffectSpawnTransform;
 
     private Player player;
     private NavMeshAgent navMeshAgent;
-    [SerializeField]
-    private Animator animator;
+
+    public Animator animator;
     private HP hp;
+
+    [SerializeField]
+    private UnityEvent onCombatStart;
 
     private void Awake()
     {
+        Instance = this;
         navMeshAgent = GetComponent<NavMeshAgent>();
         hp = GetComponent<HP>();
         navMeshAgent.enabled = false; 
@@ -102,10 +119,13 @@ public class Nupzook : MonoBehaviour
 
         animator.SetTrigger("standup");
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
+        BGMManager.Instance.ChangeBGM(BGMManager.Bgm.Disco);
+        yield return new WaitForSeconds(1f);
         lookAtPlayer = true;
         yield return new WaitForSeconds(1f);
 
+        onCombatStart?.Invoke();
         ChangeCombatState(CombatState.Move);
         StartCoroutine("Combat");
     }    
@@ -123,18 +143,28 @@ public class Nupzook : MonoBehaviour
 
             else if (combatState == CombatState.CloseCombat)
             {
-                yield return new WaitForSeconds(closeCombatCooltime + Random.Range(-closeCombatCooltimeTolerance, closeCombatCooltimeTolerance));
+                float time = 0f;
+                float targetTime = closeCombatCooltime + Random.Range(-closeCombatCooltimeTolerance, closeCombatCooltimeTolerance);
 
-                CheckDistanceAndChangeCombatState();
+                while (time < targetTime)
+                {
+                    time += Time.deltaTime;
+                    CheckDistanceAndChangeCombatState();
+                    if (combatState != CombatState.CloseCombat) break;
+                    yield return null;
+                }
+
                 if (combatState != CombatState.CloseCombat) continue;
 
                 int random = Random.Range(0, 5);
                 if (random < 2) // 40%
                 {
+                    StartCoroutine("RotateY", 45);
                     animator.SetTrigger("attack1");
                 }
                 else if (random < 4) // 40%
                 {
+                    StartCoroutine("RotateY", 80);
                     animator.SetTrigger("attack2");
                 }
                 else // 20%
@@ -146,15 +176,20 @@ public class Nupzook : MonoBehaviour
 
             else if (combatState == CombatState.FarCombat)
             {
-                yield return new WaitForSeconds(farCombatCooltime + Random.Range(-farCombatCooltimeTolerance, farCombatCooltimeTolerance));
+                // 현재 시간 기록하고, 현재 시간 + 쿨타임의 시간이 될 때까지 반복문: state 체크
+                float time = 0f;
+                float targetTime = farCombatCooltime + Random.Range(-farCombatCooltimeTolerance, farCombatCooltimeTolerance);
 
-                CheckDistanceAndChangeCombatState();
+                while (time < targetTime)
+                {
+                    time += Time.deltaTime;
+                    CheckDistanceAndChangeCombatState();
+                    if (combatState != CombatState.FarCombat) break;
+                    yield return null;
+                }
+
                 if (combatState != CombatState.FarCombat) continue;
 
-                StartCoroutine("RotateY", 4);
-                animator.SetTrigger("skill2");
-
-                /*
                 int random = Random.Range(0, 5);
                 if (random < 2) // 40%
                 {
@@ -168,7 +203,7 @@ public class Nupzook : MonoBehaviour
                 {
                     StartCoroutine("RotateY", 7);
                     animator.SetTrigger("skill2");
-                }*/
+                }
             }
             
 
@@ -183,7 +218,6 @@ public class Nupzook : MonoBehaviour
         if (this.combatState == CombatState.Move)
         { 
             navMeshAgent.enabled = false;
-            //animator.applyRootMotion = true;
             animator.SetBool("walk", false);
         }
 
@@ -191,7 +225,6 @@ public class Nupzook : MonoBehaviour
         {
             lookAtPlayer = false;
             navMeshAgent.enabled = true;
-            //animator.applyRootMotion = false;
             animator.SetBool("walk", true);
             this.combatState = CombatState.Move;
 
@@ -248,6 +281,7 @@ public class Nupzook : MonoBehaviour
         foreach (ParticleSystem particleSystem in fireParticleSystems)
         {
             particleSystem.Play();
+            StartCoroutine("FireDamage");
         }
     }
 
@@ -257,6 +291,93 @@ public class Nupzook : MonoBehaviour
         foreach (ParticleSystem particleSystem in fireParticleSystems)
         {
             particleSystem.Stop();
+            StopCoroutine("FireDamage");
+        }
+    }
+
+    public void Throw()
+    {
+        float damage = throwDamage + Random.Range(-throwDamageTolerance, throwDamageTolerance);
+
+        GameObject potion;
+        if (Random.Range(0, 2) == 0) potion = potion1;
+        else potion = potion2;
+
+        Instantiate(potion, rightHandTransform.position, rightHandTransform.rotation);
+        potion.GetComponent<BossPotion>().damage = damage;
+    }
+
+    private IEnumerator FireDamage()
+    {
+        while (true)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(fire.transform.position, fire.transform.forward, out hit, fireRange, ~ignoreLayer) && hit.collider.gameObject == player.gameObject)
+            {
+                yield return new WaitForSeconds(0.5f);
+                player.GetHit(skill2Damage); 
+            }
+            yield return null;
+        }
+    }
+
+    public void HitPlayer()
+    {
+        float actualDamage = attackDamage + Random.Range(-attackDamageTolerance, attackDamageTolerance);
+        List<MeleeWeapon> defendingMeleeWeapons = player.GetComponent<Player>().defendingWeapons;
+
+        if (defendingMeleeWeapons.Count == 0)
+        {
+            player.GetHit(actualDamage);
+        }
+
+        else
+        {
+            bool playerCanDefend = false;
+
+            foreach (MeleeWeapon weapon in defendingMeleeWeapons)
+            {
+                if (weapon.CurrentDurability > 0f)
+                {
+                    playerCanDefend = true;
+                    weapon.DefendEffect();
+                    weapon.DecreaseDurability(actualDamage, true);
+                }
+            }
+
+            if (playerCanDefend == false)
+            {
+                player.GetHit(actualDamage);
+            }
+        }
+    }
+
+    public void GetHit(float amount)
+    {
+        hp.Decrease(amount);
+        DestroyFire();
+
+        if (hp.Current < 1f)
+        {
+            animator.applyRootMotion = true;
+            animator.SetTrigger("die");
+            StopAllCoroutines();
+            lookAtPlayer = false;
+
+        }
+        else
+        {
+            animator.SetTrigger("gethit");
+        }
+    }
+
+    public void Skill1()
+    {
+        Instantiate(skill1EffectPrefab, skill1EffectSpawnTransform.position, Quaternion.identity);
+        float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+        if (distanceToPlayer < skill1Radius)
+        {
+            player.GetHit(skill1Damage);
         }
     }
 }

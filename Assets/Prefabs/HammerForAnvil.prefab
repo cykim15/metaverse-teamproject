@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7355271397306320540}
   - component: {fileID: 1875302628537613827}
   - component: {fileID: 1012815497161625327}
-  m_Layer: 8
+  m_Layer: 22
   m_Name: HammerForAnvil
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 6245869785295152703}
   - component: {fileID: 6161173744583589023}
   - component: {fileID: 1516146314554868835}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: BladeCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4267741960630635381}
-  m_Layer: 8
+  m_Layer: 22
   m_Name: Attach
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,11 +377,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: bb2bd22c289fe457c975e82ae66e9905, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 100002, guid: bb2bd22c289fe457c975e82ae66e9905, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 100004, guid: bb2bd22c289fe457c975e82ae66e9905, type: 3}
       propertyPath: m_Name
@@ -389,7 +389,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100004, guid: bb2bd22c289fe457c975e82ae66e9905, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: bb2bd22c289fe457c975e82ae66e9905, type: 3}
       propertyPath: m_RootOrder

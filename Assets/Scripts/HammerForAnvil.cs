@@ -20,15 +20,18 @@ public class HammerForAnvil : MonoBehaviour
     [SerializeField]
     private float swingIntensityThreshold = 5f;
 
+    private Vector3 effectPosition;
+
     private void Awake()
     {
         SetCooldownIs(false);
     }
 
-    public void OnBladeTouched(Collider other)
+    public void OnBladeTouched(Collider other, Vector3 bladePosition)
     {
         if (1 << other.gameObject.layer == anvilColliderLayer)
         {
+            effectPosition = other.ClosestPointOnBounds(bladePosition);
             StartCoroutine(Swing(other.gameObject));
         }
     }
@@ -85,7 +88,7 @@ public class HammerForAnvil : MonoBehaviour
             Anvil anvil = targetObject.GetComponentInParent<Anvil>();
             if (isCooldown == false && anvil != null && anvil.coinActivate.activated == true)
             {
-                anvil.TryFixWeapon();
+                anvil.TryFixWeapon(effectPosition);
                 StartCooldownTime();
             }
         }

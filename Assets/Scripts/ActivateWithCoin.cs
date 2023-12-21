@@ -9,9 +9,23 @@ public class ActivateWithCoin : MonoBehaviour
     public UnityEvent onActivate;
     public UnityEvent onDeactivate;
 
+    [SerializeField]
+    private AudioClip audioClipActivate;
+    
+    private AudioSource audioSource;
+
     private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
+
         onActivate.AddListener(() => activated = true);
+        onActivate.AddListener(PlayActivateSound);
         onDeactivate.AddListener(() => activated = false);
+    }
+
+    private void PlayActivateSound()
+    {
+        audioSource.clip = audioClipActivate;
+        audioSource.Play();
     }
 }

@@ -6,6 +6,8 @@ public class AttackCollision : MonoBehaviour
 {
     [SerializeField]
     private Enemy enemy;
+    [SerializeField]
+    private Nupzook boss;
 
     private void OnEnable()
     {
@@ -16,7 +18,8 @@ public class AttackCollision : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            enemy.HitPlayer();
+            enemy?.HitPlayer();
+            boss?.HitPlayer();
             gameObject.SetActive(false);
         }
     }

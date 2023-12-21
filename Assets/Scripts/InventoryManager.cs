@@ -42,6 +42,14 @@ public class InventoryManager : MonoBehaviour
     private XRDirectInteractor leftDirectInteractor;
     [SerializeField]
     private XRDirectInteractor rightDirectInteractor;
+    [SerializeField]
+    private AudioClip audioClipSlot;
+    [SerializeField]
+    private AudioClip audioClipPushPull;
+    [SerializeField]
+    private AudioClip audioClipCannot;
+
+    private AudioSource audioSource;
 
     private GameObject[] items;
     private int currentIndex = 0;
@@ -57,6 +65,11 @@ public class InventoryManager : MonoBehaviour
         {
             currentIndex = (value % itemCount + itemCount) % itemCount;
         }
+    }
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -140,6 +153,9 @@ public class InventoryManager : MonoBehaviour
 
         CurrentIndex++;
         ActivateSlotImage(CurrentIndex);
+
+        audioSource.clip = audioClipSlot;
+        audioSource.Play();
     }
 
     private void DeactivateSlotImage(int slot)
@@ -170,7 +186,12 @@ public class InventoryManager : MonoBehaviour
             {
                 // 쿨타임이 안끝난 무기는 못 넣음!
                 MeleeWeapon weapon = grabbedObject.GetComponent<MeleeWeapon>();
-                if (weapon != null && weapon.isCooldown == true) return;
+                if (weapon != null && weapon.isCooldown == true) 
+                {
+                    audioSource.clip = audioClipCannot;
+                    audioSource.Play();
+                    return;
+                }
 
                 interactor.interactionManager.SelectExit(interactor, interactor.selectTarget);
                 items[CurrentIndex] = grabbedObject;
@@ -191,6 +212,15 @@ public class InventoryManager : MonoBehaviour
                     itemImages[CurrentIndex].slider.SetActive(true);
                     itemImages[CurrentIndex].slider.GetComponent<Slider>().value = potion.fillAmount / potion.RealStartingFillAmount;
                 }
+
+                audioSource.clip = audioClipPushPull;
+                audioSource.Play();
+
+            }
+            else
+            {
+                audioSource.clip = audioClipCannot;
+                audioSource.Play();
             }
         }
 
@@ -210,6 +240,15 @@ public class InventoryManager : MonoBehaviour
             items[CurrentIndex] = null;
             itemImages[CurrentIndex].icon.enabled = false;
             itemImages[CurrentIndex].slider.SetActive(false);
+
+            audioSource.clip = audioClipPushPull;
+            audioSource.Play();
+        }
+
+        else
+        {
+            audioSource.clip = audioClipCannot;
+            audioSource.Play();
         }
     }
 

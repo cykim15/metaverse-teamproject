@@ -9,9 +9,11 @@ using UnityEngine.InputSystem.HID;
 
 public class Enemy : MonoBehaviour
 {
+    public static List<bool> following = new List<bool>();
+    int id;
+
     [Header("Parameter")]
-    [SerializeField]
-    private string enemyName;
+    public string enemyName;
     [SerializeField]
     private float fightDistance;
     [SerializeField]
@@ -50,7 +52,7 @@ public class Enemy : MonoBehaviour
     private float rotationSpeed = 5f;
 
     [Header("Reference")]
-    [SerializeField]
+    //[SerializeField]
     private GameObject player;
     [SerializeField]
     private Transform enemyEyes;
@@ -62,6 +64,10 @@ public class Enemy : MonoBehaviour
     private Animator animator;
     [SerializeField]
     private LayerMask ignoreLayer;
+    [SerializeField]
+    private GameObject coinSpawnEffectPrefab;
+    [SerializeField]
+    private GameObject coinPrefab;
 
     [Header("Events")]
     [SerializeField]
@@ -97,8 +103,6 @@ public class Enemy : MonoBehaviour
     private Vector3 originalPosition;
     private Quaternion originalRotation;
 
-
-
     private float playerEyeHeight = 1.5f;
 
     private void Awake()
@@ -111,6 +115,20 @@ public class Enemy : MonoBehaviour
 
         originalPosition = transform.position;
         originalRotation = transform.rotation;
+
+        id = following.Count;
+        following.Add(false);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
+    }
+
+    private void Start()
+    {
+        player = Player.Instance.gameObject;
     }
     private void Update()
     {
@@ -151,6 +169,7 @@ public class Enemy : MonoBehaviour
                         //Debug.Log("전투 시작");
                         animator.SetBool("onCombat", true);
                     }
+                    following[id] = true;
                 }
 
                 // 범위와 시야각 안에서 안 보이는 경우
@@ -283,18 +302,20 @@ public class Enemy : MonoBehaviour
     private IEnumerator WaitAndMoveToNextWaypoint(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
+        following[id] = false;
         navMeshAgent.destination = waypoints[currentWaypoint].transform.position;
     }
 
     private IEnumerator WaitAndMoveToOriginalPoint(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
+        following[id] = false;
         navMeshAgent.destination = originalPosition;
     }
 
     private IEnumerator Combat()
     {
-        while (isFighting)
+        while (isFighting && isAlive)
         {
             if (Random.Range(0, 2) == 0)
             {
@@ -313,6 +334,41 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    private IEnumerator BlinkAndDestroy()
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        int blinkNums = 4;
+        float blinkTime = 0.1f;
+
+        yield return new WaitForSeconds(3f);
+
+        for (int i = 0; i< blinkNums; i++)
+        {
+            foreach (Renderer renderer in renderers)
+            {
+                renderer.enabled = false;
+            }
+            yield return new WaitForSeconds(blinkTime);
+
+            foreach (Renderer renderer in renderers)
+            {
+                renderer.enabled = true;
+            }
+            yield return new WaitForSeconds(blinkTime);
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        int random = Random.Range(0, 2);
+        if (random == 0)
+        {
+            Instantiate(coinSpawnEffectPrefab, transform.position, transform.rotation);
+            Instantiate(coinPrefab, transform.position, transform.rotation);
+        }
+        gameObject.gameObject.SetActive(false);
+        //Destroy(gameObject);
+    }
+
     public void GetHit(float amount)
     {
         enemyHP.Decrease(amount);
@@ -320,8 +376,9 @@ public class Enemy : MonoBehaviour
         if (enemyHP.Current < 1f)
         {
             isAlive = false;
+            following[id] = false;
             onDie?.Invoke();
-            Destroy(gameObject, 3f);
+            StartCoroutine("BlinkAndDestroy");
         }
         else
         {
@@ -390,6 +447,7 @@ public class Enemy : MonoBehaviour
                 if (weapon.CurrentDurability > 0f)
                 {
                     playerCanDefend = true;
+                    weapon.DefendEffect();
                     weapon.DecreaseDurability(actualDamage, true);
                 }
             }

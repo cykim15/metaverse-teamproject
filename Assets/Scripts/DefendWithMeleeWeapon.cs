@@ -7,7 +7,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class DefendWithMeleeWeapon : MonoBehaviour
 {
     private XRDirectInteractor interactor;
-    [SerializeField]
     private Player player;
     [SerializeField]
     private string[] defendWeaponTags;
@@ -15,6 +14,11 @@ public class DefendWithMeleeWeapon : MonoBehaviour
     private void Awake()
     {
         interactor = GetComponent<XRDirectInteractor>();
+    }
+
+    private void Start()
+    {
+        player = Player.Instance;
     }
 
     public void Enable()

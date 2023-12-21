@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.PlayerLoop;
 
 public class Door : MonoBehaviour
@@ -10,6 +11,7 @@ public class Door : MonoBehaviour
 
     private bool isActivated = true;
     private float beforeSpeed = 0f;
+    private Quaternion initialRotation;
 
     private Rigidbody body;
     private HingeJoint joint;
@@ -19,9 +21,19 @@ public class Door : MonoBehaviour
     [SerializeField]
     private string doorDeactivateLayerName = "DoorDeactivate";
 
+    [SerializeField]
+    private AudioClip audioClipOpen;
+    [SerializeField]
+    private AudioClip audioClipFix;
+
+    [SerializeField]
+    private UnityEvent onDoorActivate;
+
     private Vector3 jointAnchor;
     private Vector3 jointAxis;
     private JointLimits jointLimits;
+
+    private AudioSource audioSource;
 
     private void Awake()
     {
@@ -31,6 +43,8 @@ public class Door : MonoBehaviour
         jointAnchor = joint.anchor;
         jointAxis = joint.axis;
         jointLimits = joint.limits;
+
+        audioSource = GetComponent<AudioSource>();
         
         if (isLocked)
         {
@@ -42,6 +56,7 @@ public class Door : MonoBehaviour
         {
             StartCoroutine(WaitAndStartUpdate());
         }
+        initialRotation = transform.rotation;
 
         
     }
@@ -49,6 +64,9 @@ public class Door : MonoBehaviour
     private IEnumerator WaitAndStartUpdate()
     {
         yield return new WaitForSeconds(0.5f);
+
+        audioSource.clip = audioClipOpen;
+        audioSource.Play();
 
         while (true)
         {
@@ -64,15 +82,19 @@ public class Door : MonoBehaviour
             if (isActivated && body != null)
             {
                 float speed = body.velocity.magnitude;
-                if (beforeSpeed > 0f && speed == 0f)
+                Quaternion rotation = transform.rotation;
+                if (beforeSpeed > 0f && speed == 0f && Quaternion.Angle(rotation, initialRotation) > 1f)
                 {
                     ChangeLayer(transform, doorDeactivateLayerName);
                     Destroy(joint);
                     Destroy(body);
                     isActivated = false;
+
+                    audioSource.clip = audioClipFix;
+                    audioSource.Play();
                 }
 
-                beforeSpeed = body.velocity.magnitude;
+                beforeSpeed = speed;
             }
         }
     }
@@ -95,6 +117,8 @@ public class Door : MonoBehaviour
         joint.useLimits = true;     
 
         isLocked = false;
+
+        onDoorActivate?.Invoke();
 
         StartCoroutine(WaitAndStartUpdate());
     }

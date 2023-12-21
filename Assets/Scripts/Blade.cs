@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public class Blade : MonoBehaviour
 {
     [SerializeField]
-    private UnityEvent<Collider> onHit;
+    private UnityEvent<Collider, Vector3> onHit;
 
     private bool detectCollision = true;
 
@@ -14,7 +14,7 @@ public class Blade : MonoBehaviour
     {
         if (detectCollision)
         {
-            onHit?.Invoke(other);
+            onHit?.Invoke(other, transform.position);
         }
     }
 

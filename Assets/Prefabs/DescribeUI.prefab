@@ -29,7 +29,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 280074772978943727}
-  m_LocalRotation: {x: -0.004615345, y: 0.90773714, z: 0.009989439, w: 0.41939494}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 28.85}
   m_LocalScale: {x: 0.0004, y: 0.0004, z: 0.0004}
   m_Children:
@@ -37,7 +37,7 @@ RectTransform:
   - {fileID: 280074774181482009}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -1.261, y: 130.404, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: -15.3, y: 1}
@@ -111,7 +111,7 @@ LookAtConstraint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 280074772978943727}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Weight: 1
   m_RotationAtRest: {x: 0, y: 0, z: 0}
   m_RotationOffset: {x: 0, y: 0, z: 0}
@@ -120,9 +120,7 @@ LookAtConstraint:
   m_UseUpObject: 0
   m_IsContraintActive: 1
   m_IsLocked: 0
-  m_Sources:
-  - sourceTransform: {fileID: 0}
-    weight: 1
+  m_Sources: []
 --- !u!114 &280074772978943721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,8 +133,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f462306523f6d8048b6e3e8281431dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startToViewDistance: 3.5
-  startToOpaqueDistance: 3
+  startToViewDistance: 3
+  startToDisableDistance: 1
 --- !u!225 &280074772978943720
 CanvasGroup:
   m_ObjectHideFlags: 0

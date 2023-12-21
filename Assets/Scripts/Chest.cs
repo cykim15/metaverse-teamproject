@@ -28,6 +28,12 @@ public class Chest : MonoBehaviour
     [SerializeField]
     private GameObject staminaPotionPrefab;
 
+    private AudioSource audioSource;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     private void Update()
     {
@@ -35,7 +41,7 @@ public class Chest : MonoBehaviour
         {
             if (collidingCoin != null)
             {
-                if (Vector3.Dot(collidingCoin.transform.up, Vector3.right) > 0)
+                if (Vector3.Dot(collidingCoin.transform.up, Camera.main.transform.TransformVector(Vector3.right)) > 0)
                 {
                     potion = ChestPotion.HP;
                 }
@@ -72,7 +78,6 @@ public class Chest : MonoBehaviour
     {
         SpawnPotion();
         state = ChestState.Opening;
-        pointLight.enabled = false;
         StartCoroutine(RotateLid());
     }
 
@@ -92,6 +97,14 @@ public class Chest : MonoBehaviour
 
     private IEnumerator RotateLid()
     {
+        BGMManager.Instance.audioSource.Pause();
+
+        audioSource.Play();
+        yield return new WaitForSeconds(2f);
+        BGMManager.Instance.audioSource.Play();
+
+        pointLight.color = defaultLightColor;
+
         float targetRotationX = -90f;
         float rotationSpeed = 1f;
 
@@ -105,6 +118,8 @@ public class Chest : MonoBehaviour
         }
 
         state = ChestState.Opened;
+        pointLight.enabled = false;
+        
 
     }
 

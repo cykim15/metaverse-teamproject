@@ -15,7 +15,8 @@ public class Coin : MonoBehaviour
         if (canUse)
         {
             coinUsage.onActivate?.Invoke();
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 
